@@ -1,0 +1,28 @@
+{
+  "name": "leaflet-reactive_measure",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/reactive_measure.js",
+  "scripts": {
+    "build": "webpack -p",
+    "watch": "webpack --watch"
+  },
+  "keywords": [],
+  "author": "Nicolas PROCUREUR",
+  "homepage": "https://github.com/ekylibre/leaflet-reactive_measure",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ekylibre/leaflet-reactive_measure.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "coffee-loader": "^0.8.0",
+    "coffeescript": "^1.12.7",
+    "webpack": "^3.6.0"
+  },
+  "dependencies": {
+    "geographiclib": "^1.49.0",
+    "leaflet": "0.7.7",
+    "leaflet-draw": "^0.3.2"
+  }
+}
