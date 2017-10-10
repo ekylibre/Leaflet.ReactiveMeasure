@@ -1,4 +1,4 @@
-#Leaflet.ReactiveMeasure
+# Leaflet.ReactiveMeasure
 
 This plugin extends Leaflet.Draw to provide a Measure Control on both visualization and edition mode.
 
@@ -8,6 +8,7 @@ Works with Leaflet 0.7.x and Leaflet.Draw 0.3.x
 
 ```
 L.ReactiveMeasureControl(editionLayer, {
+  position: 'bottomright',
   metric: true,
   feet: false
 }).addTo(map)

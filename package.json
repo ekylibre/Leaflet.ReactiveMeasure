@@ -9,10 +9,10 @@
   },
   "keywords": [],
   "author": "Nicolas PROCUREUR",
-  "homepage": "https://github.com/ekylibre/leaflet-reactive_measure",
+  "homepage": "https://github.com/ekylibre/Leaflet.ReactiveMeasure",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ekylibre/leaflet-reactive_measure.git"
+    "url": "https://github.com/ekylibre/Leaflet.ReactiveMeasure.git"
   },
   "license": "MIT",
   "devDependencies": {
