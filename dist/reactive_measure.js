@@ -1,1 +1,3662 @@
-!function(t){function i(e){if(s[e])return s[e].exports;var a=s[e]={i:e,l:!1,exports:{}};return t[e].call(a.exports,a,a.exports,i),a.l=!0,a.exports}var s={};i.m=t,i.c=s,i.d=function(t,s,e){i.o(t,s)||Object.defineProperty(t,s,{configurable:!1,enumerable:!0,get:e})},i.n=function(t){var s=t&&t.__esModule?function(){return t.default}:function(){return t};return i.d(s,"a",s),s},i.o=function(t,i){return Object.prototype.hasOwnProperty.call(t,i)},i.p="",i(i.s=1)}([function(t,i){t.exports=L},function(t,i,s){s(2),s(3),t.exports=s(5)},function(t,i,s){var e;e=s(0),t.exports=e.ReactiveMeasureControl=e.Control.extend({options:{position:"bottomright",metric:!0,feet:!1,measure:{perimeter:0,area:0}},initialize:function(t,i){if(null==i&&(i={}),e.Util.setOptions(this,i),this.options.measure.perimeter=0,this.options.measure.area=0,t.getLayers().length>0)return t.eachLayer(function(t){return function(i){var s;if("function"==typeof i.getMeasure)return s=i.getMeasure(),t.options.measure.perimeter+=s.perimeter,t.options.measure.area+=s.area}}(this))},onAdd:function(t){return this._container=e.DomUtil.create("div","reactive-measure-control "+t._leaflet_id),t.reactiveMeasureControl=this,t&&this._container&&this.updateContent(this.options.measure),this._container},updateContent:function(t,i){var s;null==t&&(t={}),null==i&&(i={}),s="",t.perimeter&&(s+="<span class='leaflet-draw-tooltip-measure perimeter'>"+e.GeometryUtil.readableDistance(t.perimeter,!!this.options.metric,!!i.feet)+"</span>"),t.area&&(s+="<span class='leaflet-draw-tooltip-measure area'>"+e.GeometryUtil.readableArea(t.area,!!this.options.metric)+"</span>"),null!=i.selection&&!0===i.selection?e.DomUtil.addClass(this._container,"selection"):e.DomUtil.removeClass(this._container,"selection"),this._container.innerHTML=s}}),e.FeatureGroup.include({getMeasure:function(){var t;return t={perimeter:0,area:0},this.eachLayer(function(i){var s;return s=i.getMeasure(),t.perimeter+=s.perimeter,t.area+=s.area}),t}}),e.Polygon.include({__getCenter:function(){var t,i,s,e,a,n,r,o,h,l,_;if(this.__project(),h=this._rings[0],!(n=h.length))return null;for(t=l=_=0,e=0,a=n-1;e<n;)r=h[e],o=h[a],s=r.y*o.x-o.y*r.x,l+=(r.x+o.x)*s,_+=(r.y+o.y)*s,t+=3*s,a=e++;return i=0===t?h[0]:[l/t,_/t],this._map.layerPointToLatLng(i)}}),e.Polyline.include({getLatLngsAsArray:function(){var t,i,s,e,a;for(t=[],a=this._latlngs,i=0,e=a.length;i<e;i++)s=a[i],t.push([s.lat,s.lng]);return t},__getCenter:function(){var t,i,s,e,a,n,r,o,h;if(this.__project(),s=void 0,i=void 0,h=void 0,t=void 0,a=void 0,n=void 0,o=void 0,r=this._rings[0],!(e=r.length))return null;for(s=0,i=0;s<e-1;)i+=r[s].distanceTo(r[s+1])/2,s++;if(0===i)return this._map.layerPointToLatLng(r[0]);for(s=0,t=0;s<e-1;){if(a=r[s],n=r[s+1],h=a.distanceTo(n),(t+=h)>i)return o=(t-i)/h,this._map.layerPointToLatLng([n.x-o*(n.x-a.x),n.y-o*(n.y-a.y)]);s++}},__project:function(){var t;t=new e.Bounds,this._rings=[],this.__projectLatlngs(this._latlngs,this._rings,t)},__projectLatlngs:function(t,i,s){var a,n,r,o;if(a=t[0]instanceof e.LatLng,r=t.length,n=void 0,o=void 0,a){for(o=[],n=0;n<r;)o[n]=this._map.latLngToLayerPoint(t[n]),s.extend(o[n]),n++;i.push(o)}else for(n=0;n<r;)this.__projectLatlngs(t[n],i,s),n++},getMeasure:function(){var t;return t=new e.GeographicUtil.Polygon(this.getLatLngsAsArray()),{perimeter:t.perimeter(),area:t.area()}}}),e.Draw.Polyline.include({__addHooks:e.Draw.Polyline.prototype.addHooks,__removeHooks:e.Draw.Polyline.prototype.removeHooks,__vertexChanged:e.Draw.Polyline.prototype._vertexChanged,_vertexChanged:function(){return this.__vertexChanged.apply(this,arguments),this._tooltip.hide()},__onMouseMove:function(t){var i,s,a,n,r,o,h,l,_,c;if(null!=this._tooltip&&this._tooltip.hide(),this._markers.length>0){for(_=this._map.mouseEventToLayerPoint(t.originalEvent),l=this._map.layerPointToLatLng(_),r=[],c=this._poly.getLatLngs(),a=0,o=c.length;a<o;a++)n=c[a],r.push(n);return r.push(l),1===this._markers.length&&(i=e.polyline(r)),this._markers.length>=2&&(i=e.polygon(r)),i._map=this._map,i.__getCenter(),s=new e.GeographicUtil.Polygon(i.getLatLngsAsArray()),h={perimeter:s.perimeter(),area:s.area()},t.target.reactiveMeasureControl.updateContent(h,{selection:!0})}},addHooks:function(){this.__addHooks.apply(this,arguments),this._map.on("mousemove",this.__onMouseMove,this)},removeHooks:function(){this._map.reactiveMeasureControl&&this._map.off("mousemove"),this.__removeHooks.apply(this,arguments)}}),e.Edit.Poly.include({__addHooks:e.Edit.Poly.prototype.addHooks,__removeHooks:e.Edit.Poly.prototype.removeHooks,__onHandlerDrag:function(t){var i,s;if(this._poly.__getCenter(),i=new e.GeographicUtil.Polygon(this._poly.getLatLngsAsArray()),s={perimeter:i.perimeter(),area:i.area()},e.extend(e.Draw.Polyline.prototype.options,{target:t.marker.getLatLng()}),null!=this._poly._map)return this._poly._map.reactiveMeasureControl.updateContent(s,{selection:!0})},addHooks:function(){return this.__addHooks.apply(this,arguments),this._poly.on("editdrag",this.__onHandlerDrag,this)},removeHooks:function(){var t,i;return t=new e.GeographicUtil.Polygon(this._poly.getLatLngsAsArray()),i={perimeter:t.perimeter(),area:t.area()},null!=this._poly._map&&this._poly._map.reactiveMeasureControl.updateContent(i,{selection:!1}),e.EditToolbar.reactiveMeasure&&this._poly.off("editdrag"),this.__removeHooks.apply(this,arguments)}}),e.Edit.PolyVerticesEdit.include({__onTouchMove:e.Edit.PolyVerticesEdit.prototype._onTouchMove,__removeMarker:e.Edit.PolyVerticesEdit.prototype._removeMarker,_onMarkerDrag:function(t){var i;i=t.target,e.extend(i._origLatLng,i._latlng),i._middleLeft&&i._middleLeft.setLatLng(this._getMiddleLatLng(i._prev,i)),i._middleRight&&i._middleRight.setLatLng(this._getMiddleLatLng(i,i._next)),this._poly.redraw(),this._poly.fire("editdrag",{marker:t.target})},_onTouchMove:function(t){return this.__onTouchMove.apply(this,arguments),this._poly.fire("editdrag")},_removeMarker:function(t){return this.__removeMarker.apply(this,arguments),this._poly.fire("editdrag",{marker:t})}}),e.LatLng.prototype.toArray=function(){return[this.lat,this.lng]},e.Tooltip.include({__initialize:e.Tooltip.prototype.initialize,__dispose:e.Tooltip.prototype.dispose,initialize:function(t,i){return null==i&&(i={}),this.__initialize.apply(this,arguments)},dispose:function(){return this._map.off("mouseover"),this.__dispose.apply(this,arguments)},__updateTooltipMeasure:function(t,i,s){var a;null==i&&(i={}),null==s&&(s={}),a={text:""},i.perimeter&&(a.text+="<span class='leaflet-draw-tooltip-measure perimeter'>"+e.GeometryUtil.readableDistance(i.perimeter,!!s.metric,!!s.feet)+"</span>"),i.area&&(a.text+="<span class='leaflet-draw-tooltip-measure area'>"+e.GeometryUtil.readableArea(i.area,!!s.metric)+"</span>"),t&&(this.updateContent(a),this.__updatePosition(t,s))},__updatePosition:function(t,i){var s,a,n,r,o;if(null==i&&(i={}),r=this._map.latLngToLayerPoint(t),this._container.offsetWidth,n=this._map.getContainer().offsetWidth,e.DomUtil.removeClass(this._container,"leaflet-draw-tooltip-left"),this._container)return this._container.style.visibility="inherit",s=this._map.layerPointToContainerPoint(r),o=window.getComputedStyle(this._container),a=this._container.offsetWidth+parseInt(o.paddingLeft)+parseInt(o.paddingRight)+parseInt(o.marginLeft)+parseInt(o.marginRight),(s.x<0||s.x>n-a||s.y<this._container.offsetHeight)&&(r=r.add(e.point(-a,0)),e.DomUtil.addClass(this._container,"leaflet-draw-tooltip-left")),e.DomUtil.setPosition(this._container,r)},hide:function(){return this._container.style.visibility="hidden"}}),e.EditToolbar.Edit.include({_onMouseMove:function(t){}}),e.EditToolbar.Delete.include({_onMouseMove:function(t){}}),e.DrawToolbar.include({__initialize:e.DrawToolbar.prototype.initialize,initialize:function(t){this.__initialize.apply(this,arguments)}}),e.EditToolbar.include({__initialize:e.EditToolbar.prototype.initialize,initialize:function(){this.__initialize.apply(this,arguments)}})},function(t,i,s){var e,a;a=s(0),e=s(4),a.GeographicUtil=a.extend(a.GeographicUtil||{},{geod:e.Geodesic.WGS84,distance:function(t,i){var s;return s=this.geod.Inverse(t[0],t[1],i[0],i[1]),s.s12.toFixed(3)},Polygon:function(t){var i,s,a;for(this.geod=e.Geodesic.WGS84,this.poly=this.geod.Polygon(!1),i=0,s=t.length;i<s;i++)a=t[i],this.poly.AddPoint(a[0],a[1]);this.poly=this.poly.Compute(!1,!0)}}),a.GeographicUtil.Polygon.prototype={perimeter:function(){return this.poly.perimeter},area:function(){return Math.abs(this.poly.area)}}},function(t,i,s){var e,a;!function(s){"use strict";var n={};n.Constants={},n.Math={},n.Accumulator={},function(t){t.WGS84={a:6378137,f:1/298.257223563},t.version={major:1,minor:49,patch:0},t.version_string="1.49"}(n.Constants),function(t){t.digits=53,t.epsilon=Math.pow(.5,t.digits-1),t.degree=Math.PI/180,t.sq=function(t){return t*t},t.hypot=function(t,i){var s,e;return t=Math.abs(t),i=Math.abs(i),s=Math.max(t,i),e=Math.min(t,i)/(s||1),s*Math.sqrt(1+e*e)},t.cbrt=function(t){var i=Math.pow(Math.abs(t),1/3);return t<0?-i:i},t.log1p=function(t){var i=1+t,s=i-1;return 0===s?t:t*Math.log(i)/s},t.atanh=function(i){var s=Math.abs(i);return s=t.log1p(2*s/(1-s))/2,i<0?-s:s},t.copysign=function(t,i){return Math.abs(t)*(i<0||0===i&&1/i<0?-1:1)},t.sum=function(t,i){var s,e=t+i,a=e-i,n=e-a;return a-=t,n-=i,s=-(a+n),{s:e,t:s}},t.polyval=function(t,i,s,e){for(var a=t<0?0:i[s++];--t>=0;)a=a*e+i[s++];return a},t.AngRound=function(t){if(0===t)return t;var i=1/16,s=Math.abs(t);return s=s<i?i-(i-s):s,t<0?-s:s},t.AngNormalize=function(t){return t%=360,t<=-180?t+360:t<=180?t:t-360},t.LatFix=function(t){return Math.abs(t)>90?Number.NaN:t},t.AngDiff=function(i,s){var e=t.sum(t.AngNormalize(-i),t.AngNormalize(s)),a=t.AngNormalize(e.s),n=e.t;return t.sum(180===a&&n>0?-180:a,n)},t.sincosd=function(t){var i,s,e,a,n,r;switch(i=t%360,s=Math.floor(i/90+.5),i-=90*s,i*=this.degree,e=Math.sin(i),a=Math.cos(i),3&s){case 0:n=e,r=a;break;case 1:n=a,r=-e;break;case 2:n=-e,r=-a;break;default:n=-a,r=e}return 0!==t&&(n+=0,r+=0),{s:n,c:r}},t.atan2d=function(t,i){var s,e,a=0;switch(Math.abs(t)>Math.abs(i)&&(s=i,i=t,t=s,a=2),i<0&&(i=-i,++a),e=Math.atan2(t,i)/this.degree,a){case 1:e=(t>=0?180:-180)-e;break;case 2:e=90-e;break;case 3:e=-90+e}return e}}(n.Math),function(t,i){t.Accumulator=function(t){this.Set(t)},t.Accumulator.prototype.Set=function(i){i||(i=0),i.constructor===t.Accumulator?(this._s=i._s,this._t=i._t):(this._s=i,this._t=0)},t.Accumulator.prototype.Add=function(t){var s=i.sum(t,this._t),e=i.sum(s.s,this._s);s=s.t,this._s=e.s,this._t=e.t,0===this._s?this._s=s:this._t+=s},t.Accumulator.prototype.Sum=function(i){var s;return i?(s=new t.Accumulator(this),s.Add(i),s._s):this._s},t.Accumulator.prototype.Negate=function(){this._s*=-1,this._t*=-1}}(n.Accumulator,n.Math),n.Geodesic={},n.GeodesicLine={},n.PolygonArea={},function(t,i,s,e,a){var n,r,o,h,l,_,c,p,u,f,d,g=20+e.digits+10,m=e.epsilon,A=200*m,C=Math.sqrt(m),y=m*A,M=1e3*C;t.tiny_=Math.sqrt(Number.MIN_VALUE),t.nC1_=6,t.nC1p_=6,t.nC2_=6,t.nC3_=6,t.nC4_=6,n=t.nC3_*(t.nC3_-1)/2,r=t.nC4_*(t.nC4_+1)/2,t.CAP_C1=1,t.CAP_C1p=2,t.CAP_C2=4,t.CAP_C3=8,t.CAP_C4=16,t.NONE=0,t.ARC=64,t.LATITUDE=128,t.LONGITUDE=256|t.CAP_C3,t.AZIMUTH=512,t.DISTANCE=1024|t.CAP_C1,t.STANDARD=t.LATITUDE|t.LONGITUDE|t.AZIMUTH|t.DISTANCE,t.DISTANCE_IN=2048|t.CAP_C1|t.CAP_C1p,t.REDUCEDLENGTH=4096|t.CAP_C1|t.CAP_C2,t.GEODESICSCALE=8192|t.CAP_C1|t.CAP_C2,t.AREA=16384|t.CAP_C4,t.ALL=32671,t.LONG_UNROLL=32768,t.OUT_MASK=32640|t.LONG_UNROLL,t.SinCosSeries=function(t,i,s,e){var a=e.length,n=a-(t?1:0),r=2*(s-i)*(s+i),o=1&n?e[--a]:0,h=0;for(n=Math.floor(n/2);n--;)h=r*o-h+e[--a],o=r*h-o+e[--a];return t?2*i*s*o:s*(o-h)},o=function(t,i){var s,a,n,r,o,h,l,_,c,p,u,f,d=e.sq(t),g=e.sq(i),m=(d+g-1)/6;return 0===g&&m<=0?s=0:(a=d*g/4,n=e.sq(m),r=m*n,o=a*(a+2*r),h=m,o>=0?(l=a+r,l+=l<0?-Math.sqrt(o):Math.sqrt(o),_=e.cbrt(l),h+=_+(0!==_?n/_:0)):(c=Math.atan2(Math.sqrt(-o),-(a+r)),h+=2*m*Math.cos(c/3)),p=Math.sqrt(e.sq(h)+g),u=h<0?g/(p-h):h+p,f=(u-g)/(2*p),s=u/(Math.sqrt(u+e.sq(f))+f)),s},h=[1,4,64,0,256],t.A1m1f=function(t){var i=Math.floor(3);return(e.polyval(i,h,0,e.sq(t))/h[i+1]+t)/(1-t)},l=[-1,6,-16,32,-9,64,-128,2048,9,-16,768,3,-5,512,-7,1280,-7,2048],t.C1f=function(i,s){var a,n,r=e.sq(i),o=i,h=0;for(a=1;a<=t.nC1_;++a)n=Math.floor((t.nC1_-a)/2),s[a]=o*e.polyval(n,l,h,r)/l[h+n+1],h+=n+2,o*=i},_=[205,-432,768,1536,4005,-4736,3840,12288,-225,116,384,-7173,2695,7680,3467,7680,38081,61440],t.C1pf=function(i,s){var a,n,r=e.sq(i),o=i,h=0;for(a=1;a<=t.nC1p_;++a)n=Math.floor((t.nC1p_-a)/2),s[a]=o*e.polyval(n,_,h,r)/_[h+n+1],h+=n+2,o*=i},c=[-11,-28,-192,0,256],t.A2m1f=function(t){var i=Math.floor(3);return(e.polyval(i,c,0,e.sq(t))/c[i+1]-t)/(1+t)},p=[1,2,16,32,35,64,384,2048,15,80,768,7,35,512,63,1280,77,2048],t.C2f=function(i,s){var a,n,r=e.sq(i),o=i,h=0;for(a=1;a<=t.nC2_;++a)n=Math.floor((t.nC2_-a)/2),s[a]=o*e.polyval(n,p,h,r)/p[h+n+1],h+=n+2,o*=i},t.Geodesic=function(t,i){if(this.a=t,this.f=i,this._f1=1-this.f,this._e2=this.f*(2-this.f),this._ep2=this._e2/e.sq(this._f1),this._n=this.f/(2-this.f),this._b=this.a*this._f1,this._c2=(e.sq(this.a)+e.sq(this._b)*(0===this._e2?1:(this._e2>0?e.atanh(Math.sqrt(this._e2)):Math.atan(Math.sqrt(-this._e2)))/Math.sqrt(Math.abs(this._e2))))/2,this._etol2=.1*C/Math.sqrt(Math.max(.001,Math.abs(this.f))*Math.min(1,1-this.f/2)/2),!(isFinite(this.a)&&this.a>0))throw new Error("Equatorial radius is not positive");if(!(isFinite(this._b)&&this._b>0))throw new Error("Polar semi-axis is not positive");this._A3x=new Array(6),this._C3x=new Array(n),this._C4x=new Array(r),this.A3coeff(),this.C3coeff(),this.C4coeff()},u=[-3,128,-2,-3,64,-1,-3,-1,16,3,-1,-2,8,1,-1,2,1,1],t.Geodesic.prototype.A3coeff=function(){var t,i,s=0,a=0;for(t=5;t>=0;--t)i=Math.min(6-t-1,t),this._A3x[a++]=e.polyval(i,u,s,this._n)/u[s+i+1],s+=i+2},f=[3,128,2,5,128,-1,3,3,64,-1,0,1,8,-1,1,4,5,256,1,3,128,-3,-2,3,64,1,-3,2,32,7,512,-10,9,384,5,-9,5,192,7,512,-14,7,512,21,2560],t.Geodesic.prototype.C3coeff=function(){var i,s,a,n=0,r=0;for(i=1;i<t.nC3_;++i)for(s=t.nC3_-1;s>=i;--s)a=Math.min(t.nC3_-s-1,s),this._C3x[r++]=e.polyval(a,f,n,this._n)/f[n+a+1],n+=a+2},d=[97,15015,1088,156,45045,-224,-4784,1573,45045,-10656,14144,-4576,-858,45045,64,624,-4576,6864,-3003,15015,100,208,572,3432,-12012,30030,45045,1,9009,-2944,468,135135,5792,1040,-1287,135135,5952,-11648,9152,-2574,135135,-64,-624,4576,-6864,3003,135135,8,10725,1856,-936,225225,-8448,4992,-1144,225225,-1440,4160,-4576,1716,225225,-136,63063,1024,-208,105105,3584,-3328,1144,315315,-128,135135,-2560,832,405405,128,99099],t.Geodesic.prototype.C4coeff=function(){var i,s,a,n=0,r=0;for(i=0;i<t.nC4_;++i)for(s=t.nC4_-1;s>=i;--s)a=t.nC4_-s-1,this._C4x[r++]=e.polyval(a,d,n,this._n)/d[n+a+1],n+=a+2},t.Geodesic.prototype.A3f=function(t){return e.polyval(5,this._A3x,0,t)},t.Geodesic.prototype.C3f=function(i,s){var a,n,r=1,o=0;for(a=1;a<t.nC3_;++a)n=t.nC3_-a-1,r*=i,s[a]=r*e.polyval(n,this._C3x,o,i),o+=n+1},t.Geodesic.prototype.C4f=function(i,s){var a,n,r=1,o=0;for(a=0;a<t.nC4_;++a)n=t.nC4_-a-1,s[a]=r*e.polyval(n,this._C4x,o,i),o+=n+1,r*=i},t.Geodesic.prototype.Lengths=function(i,s,e,a,n,r,o,h,l,_,c,p,u){c&=t.OUT_MASK;var f,d,g,m,A,C={},y=0,M=0,E=0,L=0;if(c&(t.DISTANCE|t.REDUCEDLENGTH|t.GEODESICSCALE)&&(E=t.A1m1f(i),t.C1f(i,p),c&(t.REDUCEDLENGTH|t.GEODESICSCALE)&&(L=t.A2m1f(i),t.C2f(i,u),y=E-L,L=1+L),E=1+E),c&t.DISTANCE)f=t.SinCosSeries(!0,r,o,p)-t.SinCosSeries(!0,e,a,p),C.s12b=E*(s+f),c&(t.REDUCEDLENGTH|t.GEODESICSCALE)&&(d=t.SinCosSeries(!0,r,o,u)-t.SinCosSeries(!0,e,a,u),M=y*s+(E*f-L*d));else if(c&(t.REDUCEDLENGTH|t.GEODESICSCALE)){for(g=1;g<=t.nC2_;++g)u[g]=E*p[g]-L*u[g];M=y*s+(t.SinCosSeries(!0,r,o,u)-t.SinCosSeries(!0,e,a,u))}return c&t.REDUCEDLENGTH&&(C.m0=y,C.m12b=h*(a*r)-n*(e*o)-a*o*M),c&t.GEODESICSCALE&&(m=a*o+e*r,A=this._ep2*(l-_)*(l+_)/(n+h),C.M12=m+(A*r-o*M)*e/n,C.M21=m-(A*e-a*M)*r/h),C},t.Geodesic.prototype.InverseStart=function(i,s,a,n,r,h,l,_,c,p,u){var f,d,g,m,C,y,E,L,v,N,D,S,T,b,G,I,U,P,O,w,x,k,q,R={},H=n*s-r*i,z=r*s+n*i;return R.sig12=-1,f=n*s,f+=r*i,d=z>=0&&H<.5&&r*l<.5,d?(m=e.sq(i+n),m/=m+e.sq(s+r),R.dnm=Math.sqrt(1+this._ep2*m),g=l/(this._f1*R.dnm),C=Math.sin(g),y=Math.cos(g)):(C=_,y=c),R.salp1=r*C,R.calp1=y>=0?H+r*i*e.sq(C)/(1+y):f-r*i*e.sq(C)/(1-y),L=e.hypot(R.salp1,R.calp1),v=i*n+s*r*y,d&&L<this._etol2?(R.salp2=s*C,R.calp2=H-s*n*(y>=0?e.sq(C)/(1+y):1-y),E=e.hypot(R.salp2,R.calp2),R.salp2/=E,R.calp2/=E,R.sig12=Math.atan2(L,v)):Math.abs(this._n)>.1||v>=0||L>=6*Math.abs(this._n)*Math.PI*e.sq(s)||(q=Math.atan2(-_,-c),this.f>=0?(b=e.sq(i)*this._ep2,G=b/(2*(1+Math.sqrt(1+b))+b),S=this.f*s*this.A3f(G)*Math.PI,T=S*s,N=q/S,D=f/T):(I=r*s-n*i,U=Math.atan2(f,I),w=this.Lengths(this._n,Math.PI+U,i,-s,a,n,r,h,s,r,t.REDUCEDLENGTH,p,u),P=w.m12b,O=w.m0,N=P/(s*r*O*Math.PI)-1,T=N<-.01?f/N:-this.f*e.sq(s)*Math.PI,S=T/s,D=l/S),D>-A&&N>-1-M?this.f>=0?(R.salp1=Math.min(1,-N),R.calp1=-Math.sqrt(1-e.sq(R.salp1))):(R.calp1=Math.max(N>-A?0:-1,N),R.salp1=Math.sqrt(1-e.sq(R.calp1))):(x=o(N,D),k=S*(this.f>=0?-N*x/(1+x):-D*(1+x)/x),C=Math.sin(k),y=-Math.cos(k),R.salp1=r*C,R.calp1=f-r*i*e.sq(C)/(1-y))),R.salp1<=0?(R.salp1=1,R.calp1=0):(E=e.hypot(R.salp1,R.calp1),R.salp1/=E,R.calp1/=E),R},t.Geodesic.prototype.Lambda12=function(i,s,a,n,r,o,h,l,_,c,p,u,f,d){var g,m,A,C,y,M,E,L,v,N,D,S,T,b={};return 0===i&&0===l&&(l=-t.tiny_),m=h*s,A=e.hypot(l,h*i),b.ssig1=i,C=m*i,b.csig1=y=l*s,g=e.hypot(b.ssig1,b.csig1),b.ssig1/=g,b.csig1/=g,b.salp2=r!==s?m/r:h,b.calp2=r!==s||Math.abs(n)!==-i?Math.sqrt(e.sq(l*s)+(s<-i?(r-s)*(s+r):(i-n)*(i+n)))/r:Math.abs(l),b.ssig2=n,M=m*n,b.csig2=E=b.calp2*r,g=e.hypot(b.ssig2,b.csig2),b.ssig2/=g,b.csig2/=g,b.sig12=Math.atan2(Math.max(0,b.csig1*b.ssig2-b.ssig1*b.csig2),b.csig1*b.csig2+b.ssig1*b.ssig2),L=Math.max(0,y*M-C*E),v=y*E+C*M,D=Math.atan2(L*c-v*_,v*c+L*_),S=e.sq(A)*this._ep2,b.eps=S/(2*(1+Math.sqrt(1+S))+S),this.C3f(b.eps,d),N=t.SinCosSeries(!0,b.ssig2,b.csig2,d)-t.SinCosSeries(!0,b.ssig1,b.csig1,d),b.domg12=-this.f*this.A3f(b.eps)*m*(b.sig12+N),b.lam12=D+b.domg12,p&&(0===b.calp2?b.dlam12=-2*this._f1*a/i:(T=this.Lengths(b.eps,b.sig12,b.ssig1,b.csig1,a,b.ssig2,b.csig2,o,s,r,t.REDUCEDLENGTH,u,f),b.dlam12=T.m12b,b.dlam12*=this._f1/(b.calp2*r))),b},t.Geodesic.prototype.Inverse=function(i,s,a,n,r){var o,h;return r||(r=t.STANDARD),r===t.LONG_UNROLL&&(r|=t.STANDARD),r&=t.OUT_MASK,o=this.InverseInt(i,s,a,n,r),h=o.vals,r&t.AZIMUTH&&(h.azi1=e.atan2d(o.salp1,o.calp1),h.azi2=e.atan2d(o.salp2,o.calp2)),h},t.Geodesic.prototype.InverseInt=function(i,s,a,n,r){var o,h,l,_,c,p,u,f,d,A,C,M,E,L,v,N,D,S,T,b,G,I,U,P,O,w,x,k,q,R,H,z,F,B,W,j,Z,K,V,Q,Y,$,J,X,tt,it,st,et,at,nt,rt,ot,ht,lt,_t,ct,pt,ut,ft,dt,gt,mt,At,Ct,yt,Mt={};if(Mt.lat1=i=e.LatFix(i),Mt.lat2=a=e.LatFix(a),i=e.AngRound(i),a=e.AngRound(a),o=e.AngDiff(s,n),h=o.t,o=o.s,r&t.LONG_UNROLL?(Mt.lon1=s,Mt.lon2=s+o+h):(Mt.lon1=e.AngNormalize(s),Mt.lon2=e.AngNormalize(n)),l=o>=0?1:-1,o=l*e.AngRound(o),h=e.AngRound(180-o-l*h),v=o*e.degree,_=e.sincosd(o>90?h:o),N=_.s,D=(o>90?-1:1)*_.c,c=Math.abs(i)<Math.abs(a)?-1:1,c<0&&(l*=-1,_=i,i=a,a=_),p=i<0?1:-1,i*=p,a*=p,_=e.sincosd(i),u=this._f1*_.s,f=_.c,_=e.hypot(u,f),u/=_,f/=_,f=Math.max(t.tiny_,f),_=e.sincosd(a),d=this._f1*_.s,A=_.c,_=e.hypot(d,A),d/=_,A/=_,A=Math.max(t.tiny_,A),f<-u?A===f&&(d=d<0?u:-u):Math.abs(d)===-u&&(A=f),E=Math.sqrt(1+this._ep2*e.sq(u)),L=Math.sqrt(1+this._ep2*e.sq(d)),U=new Array(t.nC1_+1),P=new Array(t.nC2_+1),O=new Array(t.nC3_),w=-90===i||0===N,w&&(T=D,b=N,G=1,I=0,k=u,q=T*f,R=d,H=G*A,S=Math.atan2(Math.max(0,q*R-k*H),q*H+k*R),x=this.Lengths(this._n,S,k,q,E,R,H,L,f,A,r|t.DISTANCE|t.REDUCEDLENGTH,U,P),C=x.s12b,M=x.m12b,r&t.GEODESICSCALE&&(Mt.M12=x.M12,Mt.M21=x.M21),S<1||M>=0?(S<3*t.tiny_&&(S=M=C=0),M*=this._b,C*=this._b,Mt.a12=S/e.degree):w=!1),pt=2,!w&&0===u&&(this.f<=0||h>=180*this.f))T=G=0,b=I=1,C=this.a*v,S=F=v/this._f1,M=this._b*Math.sin(S),r&t.GEODESICSCALE&&(Mt.M12=Mt.M21=Math.cos(S)),Mt.a12=o/this._f1;else if(!w)if(x=this.InverseStart(u,f,E,d,A,L,v,N,D,U,P),S=x.sig12,b=x.salp1,T=x.calp1,S>=0)I=x.salp2,G=x.calp2,B=x.dnm,C=S*this._b*B,M=e.sq(B)*this._b*Math.sin(S/B),r&t.GEODESICSCALE&&(Mt.M12=Mt.M21=Math.cos(S/B)),Mt.a12=S/e.degree,F=v/(this._f1*B);else{for(W=0,j=t.tiny_,Z=1,K=t.tiny_,V=-1,Q=!1,Y=!1;W<g&&(x=this.Lambda12(u,f,E,d,A,L,b,T,N,D,W<20,U,P,O),$=x.lam12,I=x.salp2,G=x.calp2,S=x.sig12,k=x.ssig1,q=x.csig1,R=x.ssig2,H=x.csig2,z=x.eps,ft=x.domg12,J=x.dlam12,!Y&&Math.abs($)>=(Q?8:1)*m);++W)$>0&&(W<20||T/b>V/K)?(K=b,V=T):$<0&&(W<20||T/b<Z/j)&&(j=b,Z=T),W<20&&J>0&&(X=-$/J,tt=Math.sin(X),it=Math.cos(X),(st=b*it+T*tt)>0&&Math.abs(X)<Math.PI)?(T=T*it-b*tt,b=st,_=e.hypot(b,T),b/=_,T/=_,Q=Math.abs($)<=16*m):(b=(j+K)/2,T=(Z+V)/2,_=e.hypot(b,T),b/=_,T/=_,Q=!1,Y=Math.abs(j-b)+(Z-T)<y||Math.abs(b-K)+(T-V)<y);et=r|(r&(t.REDUCEDLENGTH|t.GEODESICSCALE)?t.DISTANCE:t.NONE),x=this.Lengths(z,S,k,q,E,R,H,L,f,A,et,U,P),C=x.s12b,M=x.m12b,r&t.GEODESICSCALE&&(Mt.M12=x.M12,Mt.M21=x.M21),M*=this._b,C*=this._b,Mt.a12=S/e.degree,r&t.AREA&&(Ct=Math.sin(ft),yt=Math.cos(ft),pt=N*yt-D*Ct,ut=D*yt+N*Ct)}return r&t.DISTANCE&&(Mt.s12=0+C),r&t.REDUCEDLENGTH&&(Mt.m12=0+M),r&t.AREA&&(at=b*f,nt=e.hypot(T,b*u),0!==nt&&0!==at?(k=u,q=T*f,R=d,H=G*A,ot=e.sq(nt)*this._ep2,z=ot/(2*(1+Math.sqrt(1+ot))+ot),ht=e.sq(this.a)*nt*at*this._e2,_=e.hypot(k,q),k/=_,q/=_,_=e.hypot(R,H),R/=_,H/=_,lt=new Array(t.nC4_),this.C4f(z,lt),_t=t.SinCosSeries(!1,k,q,lt),ct=t.SinCosSeries(!1,R,H,lt),Mt.S12=ht*(ct-_t)):Mt.S12=0,!w&&pt>1&&(pt=Math.sin(F),ut=Math.cos(F)),!w&&ut>-.7071&&d-u<1.75?(ft=1+ut,dt=1+f,gt=1+A,rt=2*Math.atan2(pt*(u*gt+d*dt),ft*(u*d+dt*gt))):(mt=I*T-G*b,At=G*T+I*b,0===mt&&At<0&&(mt=t.tiny_*T,At=-1),rt=Math.atan2(mt,At)),Mt.S12+=this._c2*rt,Mt.S12*=c*l*p,Mt.S12+=0),c<0&&(_=b,b=I,I=_,_=T,T=G,G=_,r&t.GEODESICSCALE&&(_=Mt.M12,Mt.M12=Mt.M21,Mt.M21=_)),b*=c*l,T*=c*p,I*=c*l,G*=c*p,{vals:Mt,salp1:b,calp1:T,salp2:I,calp2:G}},t.Geodesic.prototype.GenDirect=function(s,e,a,n,r,o){var h;return o?o===t.LONG_UNROLL&&(o|=t.STANDARD):o=t.STANDARD,n||(o|=t.DISTANCE_IN),h=new i.GeodesicLine(this,s,e,a,o),h.GenPosition(n,r,o)},t.Geodesic.prototype.Direct=function(t,i,s,e,a){return this.GenDirect(t,i,s,!1,e,a)},t.Geodesic.prototype.ArcDirect=function(t,i,s,e,a){return this.GenDirect(t,i,s,!0,e,a)},t.Geodesic.prototype.Line=function(t,s,e,a){return new i.GeodesicLine(this,t,s,e,a)},t.Geodesic.prototype.DirectLine=function(t,i,s,e,a){return this.GenDirectLine(t,i,s,!1,e,a)},t.Geodesic.prototype.ArcDirectLine=function(t,i,s,e,a){return this.GenDirectLine(t,i,s,!0,e,a)},t.Geodesic.prototype.GenDirectLine=function(s,e,a,n,r,o){var h;return o||(o=t.STANDARD|t.DISTANCE_IN),n||(o|=t.DISTANCE_IN),h=new i.GeodesicLine(this,s,e,a,o),h.GenSetDistance(n,r),h},t.Geodesic.prototype.InverseLine=function(s,a,n,r,o){var h,l,_;return o||(o=t.STANDARD|t.DISTANCE_IN),h=this.InverseInt(s,a,n,r,t.ARC),_=e.atan2d(h.salp1,h.calp1),o&t.OUT_MASK&t.DISTANCE_IN&&(o|=t.DISTANCE),l=new i.GeodesicLine(this,s,a,_,o,h.salp1,h.calp1),l.SetArc(h.vals.a12),l},t.Geodesic.prototype.Polygon=function(t){return new s.PolygonArea(this,t)},t.WGS84=new t.Geodesic(a.WGS84.a,a.WGS84.f)}(n.Geodesic,n.GeodesicLine,n.PolygonArea,n.Math,n.Constants),function(t,i,s){i.GeodesicLine=function(i,e,a,n,r,o,h){var l,_,c,p,u,f;r||(r=t.STANDARD|t.DISTANCE_IN),this.a=i.a,this.f=i.f,this._b=i._b,this._c2=i._c2,this._f1=i._f1,this.caps=r|t.LATITUDE|t.AZIMUTH|t.LONG_UNROLL,this.lat1=s.LatFix(e),this.lon1=a,void 0===o||void 0===h?(this.azi1=s.AngNormalize(n),l=s.sincosd(s.AngRound(this.azi1)),this.salp1=l.s,this.calp1=l.c):(this.azi1=n,this.salp1=o,this.calp1=h),l=s.sincosd(s.AngRound(this.lat1)),c=this._f1*l.s,_=l.c,l=s.hypot(c,_),c/=l,_/=l,_=Math.max(t.tiny_,_),this._dn1=Math.sqrt(1+i._ep2*s.sq(c)),this._salp0=this.salp1*_,this._calp0=s.hypot(this.calp1,this.salp1*c),this._ssig1=c,this._somg1=this._salp0*c,this._csig1=this._comg1=0!==c||0!==this.calp1?_*this.calp1:1,l=s.hypot(this._ssig1,this._csig1),this._ssig1/=l,this._csig1/=l,this._k2=s.sq(this._calp0)*i._ep2,p=this._k2/(2*(1+Math.sqrt(1+this._k2))+this._k2),this.caps&t.CAP_C1&&(this._A1m1=t.A1m1f(p),this._C1a=new Array(t.nC1_+1),t.C1f(p,this._C1a),this._B11=t.SinCosSeries(!0,this._ssig1,this._csig1,this._C1a),u=Math.sin(this._B11),f=Math.cos(this._B11),this._stau1=this._ssig1*f+this._csig1*u,this._ctau1=this._csig1*f-this._ssig1*u),this.caps&t.CAP_C1p&&(this._C1pa=new Array(t.nC1p_+1),t.C1pf(p,this._C1pa)),this.caps&t.CAP_C2&&(this._A2m1=t.A2m1f(p),this._C2a=new Array(t.nC2_+1),t.C2f(p,this._C2a),this._B21=t.SinCosSeries(!0,this._ssig1,this._csig1,this._C2a)),this.caps&t.CAP_C3&&(this._C3a=new Array(t.nC3_),i.C3f(p,this._C3a),this._A3c=-this.f*this._salp0*i.A3f(p),this._B31=t.SinCosSeries(!0,this._ssig1,this._csig1,this._C3a)),this.caps&t.CAP_C4&&(this._C4a=new Array(t.nC4_),i.C4f(p,this._C4a),this._A4=s.sq(this.a)*this._calp0*this._salp0*i._e2,this._B41=t.SinCosSeries(!1,this._ssig1,this._csig1,this._C4a)),this.a13=this.s13=Number.NaN},i.GeodesicLine.prototype.GenPosition=function(i,e,a){var n,r,o,h,l,_,c,p,u,f,d,g,m,A,C,y,M,E,L,v,N,D,S,T,b,G,I,U,P,O={};return a?a===t.LONG_UNROLL&&(a|=t.STANDARD):a=t.STANDARD,a&=this.caps&t.OUT_MASK,O.lat1=this.lat1,O.azi1=this.azi1,O.lon1=a&t.LONG_UNROLL?this.lon1:s.AngNormalize(this.lon1),i?O.a12=e:O.s12=e,i||this.caps&t.DISTANCE_IN&t.OUT_MASK?(h=0,l=0,i?(n=e*s.degree,G=s.sincosd(e),r=G.s,o=G.c):(p=e/(this._b*(1+this._A1m1)),u=Math.sin(p),f=Math.cos(p),h=-t.SinCosSeries(!0,this._stau1*f+this._ctau1*u,this._ctau1*f-this._stau1*u,this._C1pa),n=p-(h-this._B11),r=Math.sin(n),o=Math.cos(n),Math.abs(this.f)>.01&&(_=this._ssig1*o+this._csig1*r,c=this._csig1*o-this._ssig1*r,h=t.SinCosSeries(!0,_,c,this._C1a),d=(1+this._A1m1)*(n+(h-this._B11))-e/this._b,n-=d/Math.sqrt(1+this._k2*s.sq(_)),r=Math.sin(n),o=Math.cos(n))),_=this._ssig1*o+this._csig1*r,c=this._csig1*o-this._ssig1*r,D=Math.sqrt(1+this._k2*s.sq(_)),a&(t.DISTANCE|t.REDUCEDLENGTH|t.GEODESICSCALE)&&((i||Math.abs(this.f)>.01)&&(h=t.SinCosSeries(!0,_,c,this._C1a)),l=(1+this._A1m1)*(h-this._B11)),y=this._calp0*_,M=s.hypot(this._salp0,this._calp0*c),0===M&&(M=c=t.tiny_),v=this._salp0,N=this._calp0*c,i&&a&t.DISTANCE&&(O.s12=this._b*((1+this._A1m1)*n+l)),a&t.LONGITUDE&&(E=this._salp0*_,L=c,C=s.copysign(1,this._salp0),g=a&t.LONG_UNROLL?C*(n-(Math.atan2(_,c)-Math.atan2(this._ssig1,this._csig1))+(Math.atan2(C*E,L)-Math.atan2(C*this._somg1,this._comg1))):Math.atan2(E*this._comg1-L*this._somg1,L*this._comg1+E*this._somg1),m=g+this._A3c*(n+(t.SinCosSeries(!0,_,c,this._C3a)-this._B31)),A=m/s.degree,O.lon2=a&t.LONG_UNROLL?this.lon1+A:s.AngNormalize(s.AngNormalize(this.lon1)+s.AngNormalize(A))),a&t.LATITUDE&&(O.lat2=s.atan2d(y,this._f1*M)),a&t.AZIMUTH&&(O.azi2=s.atan2d(v,N)),a&(t.REDUCEDLENGTH|t.GEODESICSCALE)&&(S=t.SinCosSeries(!0,_,c,this._C2a),T=(1+this._A2m1)*(S-this._B21),b=(this._A1m1-this._A2m1)*n+(l-T),a&t.REDUCEDLENGTH&&(O.m12=this._b*(D*(this._csig1*_)-this._dn1*(this._ssig1*c)-this._csig1*c*b)),a&t.GEODESICSCALE&&(G=this._k2*(_-this._ssig1)*(_+this._ssig1)/(this._dn1+D),O.M12=o+(G*_-c*b)*this._ssig1/this._dn1,O.M21=o-(G*this._ssig1-this._csig1*b)*_/D)),a&t.AREA&&(I=t.SinCosSeries(!1,_,c,this._C4a),0===this._calp0||0===this._salp0?(U=v*this.calp1-N*this.salp1,P=N*this.calp1+v*this.salp1):(U=this._calp0*this._salp0*(o<=0?this._csig1*(1-o)+r*this._ssig1:r*(this._csig1*r/(1+o)+this._ssig1)),P=s.sq(this._salp0)+s.sq(this._calp0)*this._csig1*c),O.S12=this._c2*Math.atan2(U,P)+this._A4*(I-this._B41)),i||(O.a12=n/s.degree),O):(O.a12=Number.NaN,O)},i.GeodesicLine.prototype.Position=function(t,i){return this.GenPosition(!1,t,i)},i.GeodesicLine.prototype.ArcPosition=function(t,i){return this.GenPosition(!0,t,i)},i.GeodesicLine.prototype.GenSetDistance=function(t,i){t?this.SetArc(i):this.SetDistance(i)},i.GeodesicLine.prototype.SetDistance=function(i){var s;this.s13=i,s=this.GenPosition(!1,this.s13,t.ARC),this.a13=0+s.a12},i.GeodesicLine.prototype.SetArc=function(i){var s;this.a13=i,s=this.GenPosition(!0,this.a13,t.DISTANCE),this.s13=0+s.s12}}(n.Geodesic,n.GeodesicLine,n.Math),function(t,i,s,e){var a,n;a=function(t,i){var e;return t=s.AngNormalize(t),i=s.AngNormalize(i),e=s.AngDiff(t,i).s,t<=0&&i>0&&e>0?1:i<=0&&t>0&&e<0?-1:0},n=function(t,i){return t%=720,i%=720,(i>=0&&i<360||i<-360?0:1)-(t>=0&&t<360||t<-360?0:1)},t.PolygonArea=function(t,s){this._geod=t,this.a=this._geod.a,this.f=this._geod.f,this._area0=4*Math.PI*t._c2,this.polyline=s||!1,this._mask=i.LATITUDE|i.LONGITUDE|i.DISTANCE|(this.polyline?i.NONE:i.AREA|i.LONG_UNROLL),this.polyline||(this._areasum=new e.Accumulator(0)),this._perimetersum=new e.Accumulator(0),this.Clear()},t.PolygonArea.prototype.Clear=function(){this.num=0,this._crossings=0,this.polyline||this._areasum.Set(0),this._perimetersum.Set(0),this._lat0=this._lon0=this.lat=this.lon=Number.NaN},t.PolygonArea.prototype.AddPoint=function(t,i){var s;0===this.num?(this._lat0=this.lat=t,this._lon0=this.lon=i):(s=this._geod.Inverse(this.lat,this.lon,t,i,this._mask),this._perimetersum.Add(s.s12),this.polyline||(this._areasum.Add(s.S12),this._crossings+=a(this.lon,i)),this.lat=t,this.lon=i),++this.num},t.PolygonArea.prototype.AddEdge=function(t,i){var s;this.num&&(s=this._geod.Direct(this.lat,this.lon,t,i,this._mask),this._perimetersum.Add(i),this.polyline||(this._areasum.Add(s.S12),this._crossings+=n(this.lon,s.lon2)),this.lat=s.lat2,this.lon=s.lon2),++this.num},t.PolygonArea.prototype.Compute=function(t,i){var s,n,r,o={number:this.num};return this.num<2?(o.perimeter=0,this.polyline||(o.area=0),o):this.polyline?(o.perimeter=this._perimetersum.Sum(),o):(s=this._geod.Inverse(this.lat,this.lon,this._lat0,this._lon0,this._mask),o.perimeter=this._perimetersum.Sum(s.s12),n=new e.Accumulator(this._areasum),n.Add(s.S12),r=this._crossings+a(this.lon,this._lon0),1&r&&n.Add((n.Sum()<0?1:-1)*this._area0/2),t||n.Negate(),i?n.Sum()>this._area0/2?n.Add(-this._area0):n.Sum()<=-this._area0/2&&n.Add(+this._area0):n.Sum()>=this._area0?n.Add(-this._area0):n<0&&n.Add(-this._area0),o.area=n.Sum(),o)},t.PolygonArea.prototype.TestPoint=function(t,i,s,e){var n,r,o,h,l={number:this.num+1};if(0===this.num)return l.perimeter=0,this.polyline||(l.area=0),l;for(l.perimeter=this._perimetersum.Sum(),r=this.polyline?0:this._areasum.Sum(),o=this._crossings,h=0;h<(this.polyline?1:2);++h)n=this._geod.Inverse(0===h?this.lat:t,0===h?this.lon:i,0!==h?this._lat0:t,0!==h?this._lon0:i,this._mask),l.perimeter+=n.s12,this.polyline||(r+=n.S12,o+=a(0===h?this.lon:i,0!==h?this._lon0:i));return this.polyline?l:(1&o&&(r+=(r<0?1:-1)*this._area0/2),s||(r*=-1),e?r>this._area0/2?r-=this._area0:r<=-this._area0/2&&(r+=this._area0):r>=this._area0?r-=this._area0:r<0&&(r+=this._area0),l.area=r,l)},t.PolygonArea.prototype.TestEdge=function(t,i,s,e){var r,o,h,l={number:this.num?this.num+1:0};return 0===this.num?l:(l.perimeter=this._perimetersum.Sum()+i,this.polyline?l:(o=this._areasum.Sum(),h=this._crossings,r=this._geod.Direct(this.lat,this.lon,t,i,this._mask),o+=r.S12,h+=n(this.lon,r.lon2),r=this._geod.Inverse(r.lat2,r.lon2,this._lat0,this._lon0,this._mask),l.perimeter+=r.s12,o+=r.S12,h+=a(r.lon2,this._lon0),1&h&&(o+=(o<0?1:-1)*this._area0/2),s||(o*=-1),e?o>this._area0/2?o-=this._area0:o<=-this._area0/2&&(o+=this._area0):o>=this._area0?o-=this._area0:o<0&&(o+=this._area0),l.area=o,l))}}(n.PolygonArea,n.Geodesic,n.Math,n.Accumulator),n.DMS={},function(t){var i,s,e,a,n="SNWE",r="°'\"",o=["degrees","minutes","seconds"];i=function(t,i){return t.indexOf(i.toUpperCase())},s=function(t,i){return String("0000").substr(0,Math.max(0,Math.min(4,i-t.length)))+t},t.NONE=0,t.LATITUDE=1,t.LONGITUDE=2,t.AZIMUTH=3,t.DEGREE=0,t.MINUTE=1,t.SECOND=2,t.Decode=function(s){var a,r,o,h,l,_,c,p,u=s,f=0,d=0,g=t.NONE;for(u=u.replace(/\u00b0/g,"d").replace(/\u00ba/g,"d").replace(/\u2070/g,"d").replace(/\u02da/g,"d").replace(/\u2032/g,"'").replace(/\u00b4/g,"'").replace(/\u2019/g,"'").replace(/\u2033/g,'"').replace(/\u201d/g,'"').replace(/\u2212/g,"-").replace(/''/g,'"').trim(),a=u.length,_=0;_<a;_=p,++d)if(c=_,0===d&&i(n,u.charAt(c))>=0&&++c,(d>0||c<a&&i("-+",u.charAt(c))>=0)&&++c,r=u.substr(c,a-c).indexOf("-"),o=u.substr(c,a-c).indexOf("+"),r<0?r=a:r+=c,o<0?o=a:o+=c,p=Math.min(r,o),h=e(u.substr(_,p-_)),f+=h.val,l=h.ind,g===t.NONE)g=l;else if(l!==t.NONE&&g!==l)throw new Error("Incompatible hemisphere specifies in "+u.substr(0,p));if(0===d)throw new Error("Empty or incomplete DMS string "+u);return{val:f,ind:g}},e=function(s){var e,r,h,l,_,c,p,u,f,d,g,m,A,C,y,M,E={},L="";do{if(e=1,r=0,h=s.length,l=t.NONE,_=-1,h>r&&(_=i(n,s.charAt(r)))>=0&&(l=2&_?t.LONGITUDE:t.LATITUDE,e=1&_?1:-1,++r),h>r&&(_=i(n,s.charAt(h-1)))>=0&&_>=0){if(l!==t.NONE){L=s.charAt(r-1).toUpperCase()===s.charAt(h-1).toUpperCase()?"Repeated hemisphere indicators "+s.charAt(r-1)+" in "+s.substr(r-1,h-r+1):"Contradictory hemisphere indicators "+s.charAt(r-1)+" and "+s.charAt(h-1)+" in "+s.substr(r-1,h-r+1);break}l=2&_?t.LONGITUDE:t.LATITUDE,e=1&_?1:-1,--h}if(h>r&&(_=i("-+",s.charAt(r)))>=0&&_>=0&&(e*=_?1:-1,++r),h===r){L="Empty or incomplete DMS string "+s;break}for(c=[0,0,0],p=[0,0,0],u=0,f=0,d=0,g=0,m=r,A=!1,C=0,y=0;m<h;)if(M=s.charAt(m++),(_=i("0123456789",M))>=0)++g,C>0?++C:(f=10*f+_,++y);else if("."===M){if(A){L="Multiple decimal points in "+s.substr(r,h-r);break}A=!0,C=1}else{if(!((_=i("D'\":",M))>=0)){if(i("-+",M)>=0){L="Internal sign in DMS string "+s.substr(r,h-r);break}L="Illegal character "+M+" in DMS string "+s.substr(r,h-r);break}if(_>=3){if(m===h){L="Illegal for colon to appear at the end of "+s.substr(r,h-r);break}_=u}if(_===u-1){L="Repeated "+o[_]+" component in "+s.substr(r,h-r);break}if(_<u){L=o[_]+" component follows "+o[u-1]+" component in "+s.substr(r,h-r);break}if(0===g){L="Missing numbers in "+o[_]+" component of "+s.substr(r,h-r);break}C>0&&(d=parseFloat(s.substr(m-y-C-1,y+C)),f=0),c[_]=f,p[_]=f+d,m<h&&(u=_+1,f=d=0,g=C=y=0)}if(L.length)break;if(i("D'\":",s.charAt(m-1))<0){if(u>=3){L="Extra text following seconds in DMS string "+s.substr(r,h-r);break}if(0===g){L="Missing numbers in trailing component of "+s.substr(r,h-r);break}C>0&&(d=parseFloat(s.substr(m-y-C,y+C)),f=0),c[u]=f,p[u]=f+d}if(A&&0===C){L="Decimal point in non-terminal component of "+s.substr(r,h-r);break}if(c[1]>=60||p[1]>60){L="Minutes "+p[1]+" not in range [0,60)";break}if(c[2]>=60||p[2]>60){L="Seconds "+p[2]+" not in range [0,60)";break}return E.ind=l,E.val=e*(p[2]?(60*(60*p[0]+p[1])+p[2])/3600:p[1]?(60*p[0]+p[1])/60:p[0]),E}while(!1);if(E.val=a(s),0===E.val)throw new Error(L);return E.ind=t.NONE,E},a=function(t){var i,s,e,a;return t.length<3?0:(i=t.toUpperCase().replace(/0+$/,""),s="-"===i.charAt(0)?-1:1,e="-"===i.charAt(0)||"+"===i.charAt(0)?1:0,(a=i.length-1)+1<e+3?0:(i=i.substr(e,a+1-e),"NAN"===i||"1.#QNAN"===i||"1.#SNAN"===i||"1.#IND"===i||"1.#R"===i?Number.NaN:"INF"===i||"1.#INF"===i?s*Number.POSITIVE_INFINITY:0))},t.DecodeLatLon=function(i,s,e){var a,n,r={},o=t.Decode(i),h=t.Decode(s),l=o.val,_=o.ind,c=h.val,p=h.ind;if(e||(e=!1),_===t.NONE&&p===t.NONE?(_=e?t.LONGITUDE:t.LATITUDE,p=e?t.LATITUDE:t.LONGITUDE):_===t.NONE?_=t.LATITUDE+t.LONGITUDE-p:p===t.NONE&&(p=t.LATITUDE+t.LONGITUDE-_),_===p)throw new Error("Both "+i+" and "+s+" interpreted as "+(_===t.LATITUDE?"latitudes":"longitudes"));if(a=_===t.LATITUDE?l:c,n=_===t.LATITUDE?c:l,Math.abs(a)>90)throw new Error("Latitude "+a+" not in [-90,90]");return r.lat=a,r.lon=n,r},t.DecodeAngle=function(i){var s=t.Decode(i),e=s.val;if(s.ind!==t.NONE)throw new Error("Arc angle "+i+" includes a hemisphere N/E/W/S");return e},t.DecodeAzimuth=function(i){var s=t.Decode(i),e=s.val;if(s.ind===t.LATITUDE)throw new Error("Azimuth "+i+" has a latitude hemisphere N/S");return e},t.Encode=function(i,e,a,o){var h,l,_,c,p,u,f,d,g,m=1;if(o||(o=t.NONE),!isFinite(i))return i<0?String("-inf"):i>0?String("inf"):String("nan");for(a=Math.min(15-2*e,a),h=0;h<e;++h)m*=60;for(h=0;h<a;++h)m*=10;for(o===t.AZIMUTH&&(i-=360*Math.floor(i/360)),l=i<0?-1:1,i*=l,_=Math.floor(i),c=(i-_)*m+.5,p=Math.floor(c),c=p===c&&1==(1&p)?p-1:p,c/=m,c=Math.floor((i-_)*m+.5)/m,c>=1&&(_+=1,c-=1),u=[c,0,0],h=1;h<=e;++h)f=Math.floor(u[h-1]),d=u[h-1]-f,u[h]=60*d,u[h-1]=f;switch(u[0]+=_,g="",o===t.NONE&&l<0&&(g+="-"),e){case t.DEGREE:g+=s(u[0].toFixed(a),o===t.NONE?0:1+Math.min(o,2)+a+(a?1:0))+r.charAt(0);break;default:switch(g+=s(u[0].toFixed(0),o===t.NONE?0:1+Math.min(o,2))+r.charAt(0),e){case t.MINUTE:g+=s(u[1].toFixed(a),2+a+(a?1:0))+r.charAt(1);break;case t.SECOND:g+=s(u[1].toFixed(0),2)+r.charAt(1),g+=s(u[2].toFixed(a),2+a+(a?1:0))+r.charAt(2)}}return o!==t.NONE&&o!==t.AZIMUTH&&(g+=n.charAt((o===t.LATITUDE?0:2)+(l<0?0:1))),g}}(n.DMS),function(s){"object"==typeof t&&t.exports?t.exports=s:(e=[],void 0!==(a=function(){return s}.apply(i,e))&&(t.exports=a))}(n)}()},function(t,i){L.EditToolbar.Edit.include({__removeHooks:L.EditToolbar.Edit.prototype.removeHooks,__revertLayer:L.EditToolbar.Edit.prototype._revertLayer,removeHooks:function(){if(this.__removeHooks.apply(this,arguments),this._map)return this._map.off("draw:editvertex",this._updateTooltip,this)},_revertLayer:function(t){var i;return i=L.Util.stamp(t),this.__revertLayer.apply(this,arguments),t.editing.latlngs=this._uneditedLayerProps[i].latlngs,t.editing._poly._latlngs=this._uneditedLayerProps[i].latlngs,t.editing._verticesHandlers[0]._latlngs=this._uneditedLayerProps[i].latlngs},_editStyle:function(){}}),L.EditToolbar.include({_save:function(){var t;return t=this._activeMode.handler,t.save(),t.disable()}})}]);
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports) {
+
+module.exports = L;
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(2);
+__webpack_require__(3);
+(function webpackMissingModule() { throw new Error("Cannot find module \"./src/leaflet.draw-0.3.patches.coffee\""); }());
+module.exports = __webpack_require__(5);
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var L;
+
+L = __webpack_require__(0);
+
+module.exports = L.ReactiveMeasureControl = L.Control.extend({
+  options: {
+    position: 'bottomright',
+    metric: true,
+    feet: false,
+    measure: {
+      perimeter: 0,
+      area: 0
+    }
+  },
+  initialize: function(layers, options) {
+    if (options == null) {
+      options = {};
+    }
+    L.Util.setOptions(this, options);
+    this.options.measure.perimeter = 0;
+    this.options.measure.area = 0;
+    if (layers.getLayers().length > 0) {
+      return layers.eachLayer((function(_this) {
+        return function(layer) {
+          var m;
+          if (typeof layer.getMeasure === 'function') {
+            m = layer.getMeasure();
+            _this.options.measure.perimeter += m.perimeter;
+            return _this.options.measure.area += m.area;
+          }
+        };
+      })(this));
+    }
+  },
+  onAdd: function(map) {
+    this._container = L.DomUtil.create('div', "reactive-measure-control " + map._leaflet_id);
+    map.reactiveMeasureControl = this;
+    if (map && this._container) {
+      this.updateContent(this.options.measure);
+    }
+    return this._container;
+  },
+  updateContent: function(measure, options) {
+    var text;
+    if (measure == null) {
+      measure = {};
+    }
+    if (options == null) {
+      options = {};
+    }
+    text = '';
+    if (measure['perimeter']) {
+      text += "<span class='leaflet-draw-tooltip-measure perimeter'>" + (L.GeometryUtil.readableDistance(measure.perimeter, !!this.options.metric, !!options.feet)) + "</span>";
+    }
+    if (measure['area']) {
+      text += "<span class='leaflet-draw-tooltip-measure area'>" + (L.GeometryUtil.readableArea(measure.area, !!this.options.metric)) + "</span>";
+    }
+    if ((options.selection != null) && options.selection === true) {
+      L.DomUtil.addClass(this._container, 'selection');
+    } else {
+      L.DomUtil.removeClass(this._container, 'selection');
+    }
+    this._container.innerHTML = text;
+  }
+});
+
+L.FeatureGroup.include({
+  getMeasure: function() {
+    var measure;
+    measure = {
+      perimeter: 0,
+      area: 0
+    };
+    this.eachLayer(function(layer) {
+      var m;
+      m = layer.getMeasure();
+      measure.perimeter += m.perimeter;
+      return measure.area += m.area;
+    });
+    return measure;
+  }
+});
+
+L.Polygon.include({
+
+  /*
+   * Get centroid of the polygon in square meters
+   * Portage from leaflet1.0.0-rc1: https://github.com/Leaflet/Leaflet/blob/master/src/layer/vector/Polygon.js
+   * @return {number} polygon centroid
+   */
+  __getCenter: function() {
+    var area, center, f, i, j, len, p1, p2, points, x, y;
+    this.__project();
+    points = this._rings[0];
+    len = points.length;
+    if (!len) {
+      return null;
+    }
+    area = x = y = 0;
+    i = 0;
+    j = len - 1;
+    while (i < len) {
+      p1 = points[i];
+      p2 = points[j];
+      f = p1.y * p2.x - (p2.y * p1.x);
+      x += (p1.x + p2.x) * f;
+      y += (p1.y + p2.y) * f;
+      area += f * 3;
+      j = i++;
+    }
+    if (area === 0) {
+      center = points[0];
+    } else {
+      center = [x / area, y / area];
+    }
+    return this._map.layerPointToLatLng(center);
+  }
+});
+
+L.Polyline.include({
+
+  /*
+   * Return LatLngs as array of [lat, lng] pair.
+   * @return {Array} [[lat,lng], [lat,lng]]
+   */
+  getLatLngsAsArray: function() {
+    var arr, k, latlng, len1, ref;
+    arr = [];
+    ref = this._latlngs;
+    for (k = 0, len1 = ref.length; k < len1; k++) {
+      latlng = ref[k];
+      arr.push([latlng.lat, latlng.lng]);
+    }
+    return arr;
+  },
+
+  /*
+   * Get center of the polyline in meters
+   * Portage from leaflet1.0.0-rc1: https://github.com/Leaflet/Leaflet/blob/master/src/layer/vector/Polyline.js
+   * @return {number} polyline center
+   */
+  __getCenter: function() {
+    var dist, halfDist, i, len, p1, p2, points, ratio, segDist;
+    this.__project();
+    i = void 0;
+    halfDist = void 0;
+    segDist = void 0;
+    dist = void 0;
+    p1 = void 0;
+    p2 = void 0;
+    ratio = void 0;
+    points = this._rings[0];
+    len = points.length;
+    if (!len) {
+      return null;
+    }
+    i = 0;
+    halfDist = 0;
+    while (i < len - 1) {
+      halfDist += points[i].distanceTo(points[i + 1]) / 2;
+      i++;
+    }
+    if (halfDist === 0) {
+      return this._map.layerPointToLatLng(points[0]);
+    }
+    i = 0;
+    dist = 0;
+    while (i < len - 1) {
+      p1 = points[i];
+      p2 = points[i + 1];
+      segDist = p1.distanceTo(p2);
+      dist += segDist;
+      if (dist > halfDist) {
+        ratio = (dist - halfDist) / segDist;
+        return this._map.layerPointToLatLng([p2.x - (ratio * (p2.x - p1.x)), p2.y - (ratio * (p2.y - p1.y))]);
+      }
+      i++;
+    }
+  },
+  __project: function() {
+    var pxBounds;
+    pxBounds = new L.Bounds;
+    this._rings = [];
+    this.__projectLatlngs(this._latlngs, this._rings, pxBounds);
+  },
+  __projectLatlngs: function(latlngs, result, projectedBounds) {
+    var flat, i, len, ring;
+    flat = latlngs[0] instanceof L.LatLng;
+    len = latlngs.length;
+    i = void 0;
+    ring = void 0;
+    if (flat) {
+      ring = [];
+      i = 0;
+      while (i < len) {
+        ring[i] = this._map.latLngToLayerPoint(latlngs[i]);
+        projectedBounds.extend(ring[i]);
+        i++;
+      }
+      result.push(ring);
+    } else {
+      i = 0;
+      while (i < len) {
+        this.__projectLatlngs(latlngs[i], result, projectedBounds);
+        i++;
+      }
+    }
+  },
+  getMeasure: function() {
+    var g, measure;
+    g = new L.GeographicUtil.Polygon(this.getLatLngsAsArray());
+    measure = {
+      perimeter: g.perimeter(),
+      area: g.area()
+    };
+    return measure;
+  }
+});
+
+L.Draw.Polyline.include({
+  __addHooks: L.Draw.Polyline.prototype.addHooks,
+  __removeHooks: L.Draw.Polyline.prototype.removeHooks,
+  __vertexChanged: L.Draw.Polyline.prototype._vertexChanged,
+  _vertexChanged: function() {
+    this.__vertexChanged.apply(this, arguments);
+    return this._tooltip.hide();
+  },
+  __onMouseMove: function(e) {
+    var center, clone, g, k, latLng, latLngArray, len1, measure, mouseLatLng, newPos, ref;
+    if (this._tooltip != null) {
+      this._tooltip.hide();
+    }
+    if (!(this._markers.length > 0)) {
+      return;
+    }
+    newPos = this._map.mouseEventToLayerPoint(e.originalEvent);
+    mouseLatLng = this._map.layerPointToLatLng(newPos);
+    latLngArray = [];
+    ref = this._poly.getLatLngs();
+    for (k = 0, len1 = ref.length; k < len1; k++) {
+      latLng = ref[k];
+      latLngArray.push(latLng);
+    }
+    latLngArray.push(mouseLatLng);
+    if (this._markers.length === 1) {
+      clone = L.polyline(latLngArray);
+    }
+    if (this._markers.length >= 2) {
+      console.log(this._markers);
+      clone = L.polygon(latLngArray);
+    }
+    clone._map = this._map;
+    center = clone.__getCenter();
+    g = new L.GeographicUtil.Polygon(clone.getLatLngsAsArray());
+    measure = {
+      perimeter: g.perimeter(),
+      area: g.area()
+    };
+    return e.target.reactiveMeasureControl.updateContent(measure, {
+      selection: true
+    });
+  },
+  addHooks: function() {
+    this.__addHooks.apply(this, arguments);
+    this._map.on('mousemove', this.__onMouseMove, this);
+  },
+  removeHooks: function() {
+    if (this._map.reactiveMeasureControl) {
+      this._map.off('mousemove');
+    }
+    this.__removeHooks.apply(this, arguments);
+  }
+});
+
+L.Edit.Poly.include({
+  __addHooks: L.Edit.Poly.prototype.addHooks,
+  __removeHooks: L.Edit.Poly.prototype.removeHooks,
+  __onHandlerDrag: function(e) {
+    var center, g, measure;
+    center = this._poly.__getCenter();
+    g = new L.GeographicUtil.Polygon(this._poly.getLatLngsAsArray());
+    measure = {
+      perimeter: g.perimeter(),
+      area: g.area()
+    };
+    L.extend(L.Draw.Polyline.prototype.options, {
+      target: e.marker.getLatLng()
+    });
+    if (this._poly._map != null) {
+      return this._poly._map.reactiveMeasureControl.updateContent(measure, {
+        selection: true
+      });
+    }
+  },
+  addHooks: function() {
+    this.__addHooks.apply(this, arguments);
+    return this._poly.on('editdrag', this.__onHandlerDrag, this);
+  },
+  removeHooks: function() {
+    var g, measure;
+    g = new L.GeographicUtil.Polygon(this._poly.getLatLngsAsArray());
+    measure = {
+      perimeter: g.perimeter(),
+      area: g.area()
+    };
+    if (this._poly._map != null) {
+      this._poly._map.reactiveMeasureControl.updateContent(measure, {
+        selection: false
+      });
+    }
+    if (L.EditToolbar.reactiveMeasure) {
+      this._poly.off('editdrag');
+    }
+    return this.__removeHooks.apply(this, arguments);
+  }
+});
+
+L.Edit.PolyVerticesEdit.include({
+  __onTouchMove: L.Edit.PolyVerticesEdit.prototype._onTouchMove,
+  __removeMarker: L.Edit.PolyVerticesEdit.prototype._removeMarker,
+  _onMarkerDrag: function(e) {
+    var marker;
+    marker = e.target;
+    L.extend(marker._origLatLng, marker._latlng);
+    if (marker._middleLeft) {
+      marker._middleLeft.setLatLng(this._getMiddleLatLng(marker._prev, marker));
+    }
+    if (marker._middleRight) {
+      marker._middleRight.setLatLng(this._getMiddleLatLng(marker, marker._next));
+    }
+    this._poly.redraw();
+    this._poly.fire('editdrag', {
+      marker: e.target
+    });
+  },
+  _onTouchMove: function(e) {
+    this.__onTouchMove.apply(this, arguments);
+    return this._poly.fire('editdrag');
+  },
+  _removeMarker: function(marker) {
+    this.__removeMarker.apply(this, arguments);
+    return this._poly.fire('editdrag', {
+      marker: marker
+    });
+  }
+});
+
+L.LatLng.prototype.toArray = function() {
+  return [this.lat, this.lng];
+};
+
+L.Draw.Tooltip.include({
+  __initialize: L.Draw.Tooltip.prototype.initialize,
+  __dispose: L.Draw.Tooltip.prototype.dispose,
+  initialize: function(map, options) {
+    if (options == null) {
+      options = {};
+    }
+    return this.__initialize.apply(this, arguments);
+  },
+  dispose: function() {
+    this._map.off('mouseover');
+    return this.__dispose.apply(this, arguments);
+  },
+  __updateTooltipMeasure: function(latLng, measure, options) {
+    var labelText;
+    if (measure == null) {
+      measure = {};
+    }
+    if (options == null) {
+      options = {};
+    }
+    labelText = {
+      text: ''
+    };
+    if (measure['perimeter']) {
+      labelText['text'] += "<span class='leaflet-draw-tooltip-measure perimeter'>" + (L.GeometryUtil.readableDistance(measure.perimeter, !!options.metric, !!options.feet)) + "</span>";
+    }
+    if (measure['area']) {
+      labelText['text'] += "<span class='leaflet-draw-tooltip-measure area'>" + (L.GeometryUtil.readableArea(measure.area, !!options.metric)) + "</span>";
+    }
+    if (latLng) {
+      this.updateContent(labelText);
+      this.__updatePosition(latLng, options);
+    }
+  },
+  __updatePosition: function(latlng, options) {
+    var container, container_width, labelWidth, map_width, pos, styles;
+    if (options == null) {
+      options = {};
+    }
+    pos = this._map.latLngToLayerPoint(latlng);
+    labelWidth = this._container.offsetWidth;
+    map_width = this._map.getContainer().offsetWidth;
+    L.DomUtil.removeClass(this._container, 'leaflet-draw-tooltip-left');
+    if (this._container) {
+      this._container.style.visibility = 'inherit';
+      container = this._map.layerPointToContainerPoint(pos);
+      styles = window.getComputedStyle(this._container);
+      container_width = this._container.offsetWidth + parseInt(styles.paddingLeft) + parseInt(styles.paddingRight) + parseInt(styles.marginLeft) + parseInt(styles.marginRight);
+      if (container.x < 0 || container.x > (map_width - container_width) || container.y < this._container.offsetHeight) {
+        pos = pos.add(L.point(-container_width, 0));
+        L.DomUtil.addClass(this._container, 'leaflet-draw-tooltip-left');
+      }
+      return L.DomUtil.setPosition(this._container, pos);
+    }
+  },
+  hide: function() {
+    return this._container.style.visibility = 'hidden';
+  }
+});
+
+L.EditToolbar.Edit.include({
+  _onMouseMove: function(e) {}
+});
+
+L.EditToolbar.Delete.include({
+  _onMouseMove: function(e) {}
+});
+
+
+/*
+#Add Configuration options
+ */
+
+L.DrawToolbar.include({
+  __initialize: L.DrawToolbar.prototype.initialize,
+  initialize: function(options) {
+    this.__initialize.apply(this, arguments);
+  }
+});
+
+L.EditToolbar.include({
+  __initialize: L.EditToolbar.prototype.initialize,
+  initialize: function() {
+    this.__initialize.apply(this, arguments);
+  }
+});
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var GeographicLib, L;
+
+L = __webpack_require__(0);
+
+GeographicLib = __webpack_require__(4);
+
+L.GeographicUtil = L.extend(L.GeographicUtil || {}, {
+  geod: GeographicLib.Geodesic.WGS84,
+  distance: function(a, b) {
+    var r;
+    r = this.geod.Inverse(a[0], a[1], b[0], b[1]);
+    return r.s12.toFixed(3);
+  },
+  Polygon: function(points) {
+    var i, len, point;
+    this.geod = GeographicLib.Geodesic.WGS84;
+    this.poly = this.geod.Polygon(false);
+    for (i = 0, len = points.length; i < len; i++) {
+      point = points[i];
+      this.poly.AddPoint(point[0], point[1]);
+    }
+    this.poly = this.poly.Compute(false, true);
+  }
+});
+
+L.GeographicUtil.Polygon.prototype = {
+  perimeter: function() {
+    return this.poly.perimeter;
+  },
+  area: function() {
+    return Math.abs(this.poly.area);
+  }
+};
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
+ * Geodesic routines from GeographicLib translated to JavaScript.  See
+ * https://geographiclib.sourceforge.io/html/js/
+ *
+ * The algorithms are derived in
+ *
+ *    Charles F. F. Karney,
+ *    Algorithms for geodesics, J. Geodesy 87, 43-55 (2013),
+ *    https://doi.org/10.1007/s00190-012-0578-z
+ *    Addenda: https://geographiclib.sourceforge.io/geod-addenda.html
+ *
+ * This file is the concatenation and compression of the JavaScript files in
+ * doc/scripts/GeographicLib in the source tree for GeographicLib.
+ *
+ * Copyright (c) Charles Karney (2011-2015) <charles@karney.com> and licensed
+ * under the MIT/X11 License.  For more information, see
+ * https://geographiclib.sourceforge.io/
+ *
+ * Version: 1.49
+ * File inventory:
+ *   Math.js Geodesic.js GeodesicLine.js PolygonArea.js DMS.js
+ */
+
+(function(cb) {
+
+/**************** Math.js ****************/
+/*
+ * Math.js
+ * Transcription of Math.hpp, Constants.hpp, and Accumulator.hpp into
+ * JavaScript.
+ *
+ * Copyright (c) Charles Karney (2011-2017) <charles@karney.com> and licensed
+ * under the MIT/X11 License.  For more information, see
+ * https://geographiclib.sourceforge.io/
+ */
+
+/**
+ * @namespace GeographicLib
+ * @description The parent namespace for the following modules:
+ * - {@link module:GeographicLib/Geodesic GeographicLib/Geodesic} The main
+ *   engine for solving geodesic problems via the
+ *   {@link module:GeographicLib/Geodesic.Geodesic Geodesic} class.
+ * - {@link module:GeographicLib/GeodesicLine GeographicLib/GeodesicLine}
+ *   computes points along a single geodesic line via the
+ *   {@link module:GeographicLib/GeodesicLine.GeodesicLine GeodesicLine}
+ *   class.
+ * - {@link module:GeographicLib/PolygonArea GeographicLib/PolygonArea}
+ *   computes the area of a geodesic polygon via the
+ *   {@link module:GeographicLib/PolygonArea.PolygonArea PolygonArea}
+ *   class.
+ * - {@link module:GeographicLib/DMS GeographicLib/DMS} handles the decoding
+ *   and encoding of angles in degree, minutes, and seconds, via static
+ *   functions in this module.
+ * - {@link module:GeographicLib/Constants GeographicLib/Constants} defines
+ *   constants specifying the version numbers and the parameters for the WGS84
+ *   ellipsoid.
+ *
+ * The following modules are used internally by the package:
+ * - {@link module:GeographicLib/Math GeographicLib/Math} defines various
+ *   mathematical functions.
+ * - {@link module:GeographicLib/Accumulator GeographicLib/Accumulator}
+ *   interally used by
+ *   {@link module:GeographicLib/PolygonArea.PolygonArea PolygonArea} (via the
+ *   {@link module:GeographicLib/Accumulator.Accumulator Accumulator} class)
+ *   for summing the contributions to the area of a polygon.
+ */
+"use strict";
+var GeographicLib = {};
+GeographicLib.Constants = {};
+GeographicLib.Math = {};
+GeographicLib.Accumulator = {};
+
+(function(
+  /**
+   * @exports GeographicLib/Constants
+   * @description Define constants defining the version and WGS84 parameters.
+   */
+  c) {
+
+  /**
+   * @constant
+   * @summary WGS84 parameters.
+   * @property {number} a the equatorial radius (meters).
+   * @property {number} f the flattening.
+   */
+  c.WGS84 = { a: 6378137, f: 1/298.257223563 };
+  /**
+   * @constant
+   * @summary an array of version numbers.
+   * @property {number} major the major version number.
+   * @property {number} minor the minor version number.
+   * @property {number} patch the patch number.
+   */
+  c.version = { major: 1, minor: 49, patch: 0 };
+  /**
+   * @constant
+   * @summary version string
+   */
+  c.version_string = "1.49";
+})(GeographicLib.Constants);
+
+(function(
+  /**
+   * @exports GeographicLib/Math
+   * @description Some useful mathematical constants and functions (mainly for
+   *   internal use).
+   */
+  m) {
+
+  /**
+   * @summary The number of digits of precision in floating-point numbers.
+   * @constant {number}
+   */
+  m.digits = 53;
+  /**
+   * @summary The machine epsilon.
+   * @constant {number}
+   */
+  m.epsilon = Math.pow(0.5, m.digits - 1);
+  /**
+   * @summary The factor to convert degrees to radians.
+   * @constant {number}
+   */
+  m.degree = Math.PI/180;
+
+  /**
+   * @summary Square a number.
+   * @param {number} x the number.
+   * @returns {number} the square.
+   */
+  m.sq = function(x) { return x * x; };
+
+  /**
+   * @summary The hypotenuse function.
+   * @param {number} x the first side.
+   * @param {number} y the second side.
+   * @returns {number} the hypotenuse.
+   */
+  m.hypot = function(x, y) {
+    var a, b;
+    x = Math.abs(x);
+    y = Math.abs(y);
+    a = Math.max(x, y); b = Math.min(x, y) / (a ? a : 1);
+    return a * Math.sqrt(1 + b * b);
+  };
+
+  /**
+   * @summary Cube root function.
+   * @param {number} x the argument.
+   * @returns {number} the real cube root.
+   */
+  m.cbrt = function(x) {
+    var y = Math.pow(Math.abs(x), 1/3);
+    return x < 0 ? -y : y;
+  };
+
+  /**
+   * @summary The log1p function.
+   * @param {number} x the argument.
+   * @returns {number} log(1 + x).
+   */
+  m.log1p = function(x) {
+    var y = 1 + x,
+        z = y - 1;
+    // Here's the explanation for this magic: y = 1 + z, exactly, and z
+    // approx x, thus log(y)/z (which is nearly constant near z = 0) returns
+    // a good approximation to the true log(1 + x)/x.  The multiplication x *
+    // (log(y)/z) introduces little additional error.
+    return z === 0 ? x : x * Math.log(y) / z;
+  };
+
+  /**
+   * @summary Inverse hyperbolic tangent.
+   * @param {number} x the argument.
+   * @returns {number} tanh<sup>&minus;1</sup> x.
+   */
+  m.atanh = function(x) {
+    var y = Math.abs(x);          // Enforce odd parity
+    y = m.log1p(2 * y/(1 - y))/2;
+    return x < 0 ? -y : y;
+  };
+
+  /**
+   * @summary Copy the sign.
+   * @param {number} x gives the magitude of the result.
+   * @param {number} y gives the sign of the result.
+   * @returns {number} value with the magnitude of x and with the sign of y.
+   */
+  m.copysign = function(x, y) {
+    return Math.abs(x) * (y < 0 || (y === 0 && 1/y < 0) ? -1 : 1);
+  };
+
+  /**
+   * @summary An error-free sum.
+   * @param {number} u
+   * @param {number} v
+   * @returns {object} sum with sum.s = round(u + v) and sum.t is u + v &minus;
+   *   round(u + v)
+   */
+  m.sum = function(u, v) {
+    var s = u + v,
+        up = s - v,
+        vpp = s - up,
+        t;
+    up -= u;
+    vpp -= v;
+    t = -(up + vpp);
+    // u + v =       s      + t
+    //       = round(u + v) + t
+    return {s: s, t: t};
+  };
+
+  /**
+   * @summary Evaluate a polynomial.
+   * @param {integer} N the order of the polynomial.
+   * @param {array} p the coefficient array (of size N + 1) (leading
+   *   order coefficient first)
+   * @param {number} x the variable.
+   * @returns {number} the value of the polynomial.
+   */
+  m.polyval = function(N, p, s, x) {
+    var y = N < 0 ? 0 : p[s++];
+    while (--N >= 0) y = y * x + p[s++];
+    return y;
+  };
+
+  /**
+   * @summary Coarsen a value close to zero.
+   * @param {number} x
+   * @returns {number} the coarsened value.
+   */
+  m.AngRound = function(x) {
+    // The makes the smallest gap in x = 1/16 - nextafter(1/16, 0) = 1/2^57 for
+    // reals = 0.7 pm on the earth if x is an angle in degrees.  (This is about
+    // 1000 times more resolution than we get with angles around 90 degrees.)
+    // We use this to avoid having to deal with near singular cases when x is
+    // non-zero but tiny (e.g., 1.0e-200).  This converts -0 to +0; however
+    // tiny negative numbers get converted to -0.
+    if (x === 0) return x;
+    var z = 1/16,
+        y = Math.abs(x);
+    // The compiler mustn't "simplify" z - (z - y) to y
+    y = y < z ? z - (z - y) : y;
+    return x < 0 ? -y : y;
+  };
+
+  /**
+   * @summary Normalize an angle.
+   * @param {number} x the angle in degrees.
+   * @returns {number} the angle reduced to the range (&minus;180&deg;,
+   *   180&deg;].
+   */
+  m.AngNormalize = function(x) {
+    // Place angle in [-180, 180).
+    x = x % 360;
+    return x <= -180 ? x + 360 : (x <= 180 ? x : x - 360);
+  };
+
+  /**
+   * @summary Normalize a latitude.
+   * @param {number} x the angle in degrees.
+   * @returns {number} x if it is in the range [&minus;90&deg;, 90&deg;],
+   *   otherwise return NaN.
+   */
+  m.LatFix = function(x) {
+    // Replace angle with NaN if outside [-90, 90].
+    return Math.abs(x) > 90 ? Number.NaN : x;
+  };
+
+  /**
+   * @summary The exact difference of two angles reduced to (&minus;180&deg;,
+   *   180&deg;]
+   * @param {number} x the first angle in degrees.
+   * @param {number} y the second angle in degrees.
+   * @return {object} diff the exact difference, y &minus; x.
+   *
+   * This computes z = y &minus; x exactly, reduced to (&minus;180&deg;,
+   * 180&deg;]; and then sets diff.s = d = round(z) and diff.t = e = z &minus;
+   * round(z).  If d = &minus;180, then e &gt; 0; If d = 180, then e &le; 0.
+   */
+  m.AngDiff = function(x, y) {
+    // Compute y - x and reduce to [-180,180] accurately.
+    var r = m.sum(m.AngNormalize(-x), m.AngNormalize(y)),
+        d = m.AngNormalize(r.s),
+        t = r.t;
+    return m.sum(d === 180 && t > 0 ? -180 : d, t);
+  };
+
+  /**
+   * @summary Evaluate the sine and cosine function with the argument in
+   *   degrees
+   * @param {number} x in degrees.
+   * @returns {object} r with r.s = sin(x) and r.c = cos(x).
+   */
+  m.sincosd = function(x) {
+    // In order to minimize round-off errors, this function exactly reduces
+    // the argument to the range [-45, 45] before converting it to radians.
+    var r, q, s, c, sinx, cosx;
+    r = x % 360;
+    q = Math.floor(r / 90 + 0.5);
+    r -= 90 * q;
+    // now abs(r) <= 45
+    r *= this.degree;
+    // Possibly could call the gnu extension sincos
+    s = Math.sin(r); c = Math.cos(r);
+    switch (q & 3) {
+      case 0:  sinx =  s; cosx =  c; break;
+      case 1:  sinx =  c; cosx = -s; break;
+      case 2:  sinx = -s; cosx = -c; break;
+      default: sinx = -c; cosx =  s; break; // case 3
+    }
+    if (x !== 0) { sinx += 0; cosx += 0; }
+    return {s: sinx, c: cosx};
+  };
+
+  /**
+   * @summary Evaluate the atan2 function with the result in degrees
+   * @param {number} y
+   * @param {number} x
+   * @returns atan2(y, x) in degrees, in the range (&minus;180&deg;
+   *   180&deg;].
+   */
+  m.atan2d = function(y, x) {
+    // In order to minimize round-off errors, this function rearranges the
+    // arguments so that result of atan2 is in the range [-pi/4, pi/4] before
+    // converting it to degrees and mapping the result to the correct
+    // quadrant.
+    var q = 0, t, ang;
+    if (Math.abs(y) > Math.abs(x)) { t = x; x = y; y = t; q = 2; }
+    if (x < 0) { x = -x; ++q; }
+    // here x >= 0 and x >= abs(y), so angle is in [-pi/4, pi/4]
+    ang = Math.atan2(y, x) / this.degree;
+    switch (q) {
+      // Note that atan2d(-0.0, 1.0) will return -0.  However, we expect that
+      // atan2d will not be called with y = -0.  If need be, include
+      //
+      //   case 0: ang = 0 + ang; break;
+      //
+      // and handle mpfr as in AngRound.
+      case 1: ang = (y >= 0 ? 180 : -180) - ang; break;
+      case 2: ang =  90 - ang; break;
+      case 3: ang = -90 + ang; break;
+    }
+    return ang;
+  };
+})(GeographicLib.Math);
+
+(function(
+  /**
+   * @exports GeographicLib/Accumulator
+   * @description Accurate summation via the
+   *   {@link module:GeographicLib/Accumulator.Accumulator Accumulator} class
+   *   (mainly for internal use).
+   */
+  a, m) {
+
+  /**
+   * @class
+   * @summary Accurate summation of many numbers.
+   * @classdesc This allows many numbers to be added together with twice the
+   *   normal precision.  In the documentation of the member functions, sum
+   *   stands for the value currently held in the accumulator.
+   * @param {number | Accumulator} [y = 0]  set sum = y.
+   */
+  a.Accumulator = function(y) {
+    this.Set(y);
+  };
+
+  /**
+   * @summary Set the accumulator to a number.
+   * @param {number | Accumulator} [y = 0] set sum = y.
+   */
+  a.Accumulator.prototype.Set = function(y) {
+    if (!y) y = 0;
+    if (y.constructor === a.Accumulator) {
+      this._s = y._s;
+      this._t = y._t;
+    } else {
+      this._s = y;
+      this._t = 0;
+    }
+  };
+
+  /**
+   * @summary Add a number to the accumulator.
+   * @param {number} [y = 0] set sum += y.
+   */
+  a.Accumulator.prototype.Add = function(y) {
+    // Here's Shewchuk's solution...
+    // Accumulate starting at least significant end
+    var u = m.sum(y, this._t),
+        v = m.sum(u.s, this._s);
+    u = u.t;
+    this._s = v.s;
+    this._t = v.t;
+    // Start is _s, _t decreasing and non-adjacent.  Sum is now (s + t + u)
+    // exactly with s, t, u non-adjacent and in decreasing order (except
+    // for possible zeros).  The following code tries to normalize the
+    // result.  Ideally, we want _s = round(s+t+u) and _u = round(s+t+u -
+    // _s).  The follow does an approximate job (and maintains the
+    // decreasing non-adjacent property).  Here are two "failures" using
+    // 3-bit floats:
+    //
+    // Case 1: _s is not equal to round(s+t+u) -- off by 1 ulp
+    // [12, -1] - 8 -> [4, 0, -1] -> [4, -1] = 3 should be [3, 0] = 3
+    //
+    // Case 2: _s+_t is not as close to s+t+u as it shold be
+    // [64, 5] + 4 -> [64, 8, 1] -> [64,  8] = 72 (off by 1)
+    //                    should be [80, -7] = 73 (exact)
+    //
+    // "Fixing" these problems is probably not worth the expense.  The
+    // representation inevitably leads to small errors in the accumulated
+    // values.  The additional errors illustrated here amount to 1 ulp of
+    // the less significant word during each addition to the Accumulator
+    // and an additional possible error of 1 ulp in the reported sum.
+    //
+    // Incidentally, the "ideal" representation described above is not
+    // canonical, because _s = round(_s + _t) may not be true.  For
+    // example, with 3-bit floats:
+    //
+    // [128, 16] + 1 -> [160, -16] -- 160 = round(145).
+    // But [160, 0] - 16 -> [128, 16] -- 128 = round(144).
+    //
+    if (this._s === 0)          // This implies t == 0,
+      this._s = u;              // so result is u
+    else
+      this._t += u;             // otherwise just accumulate u to t.
+  };
+
+  /**
+   * @summary Return the result of adding a number to sum (but
+   *   don't change sum).
+   * @param {number} [y = 0] the number to be added to the sum.
+   * @return sum + y.
+   */
+  a.Accumulator.prototype.Sum = function(y) {
+    var b;
+    if (!y)
+      return this._s;
+    else {
+      b = new a.Accumulator(this);
+      b.Add(y);
+      return b._s;
+    }
+  };
+
+  /**
+   * @summary Set sum = &minus;sum.
+   */
+  a.Accumulator.prototype.Negate = function() {
+    this._s *= -1;
+    this._t *= -1;
+  };
+})(GeographicLib.Accumulator, GeographicLib.Math);
+
+/**************** Geodesic.js ****************/
+/*
+ * Geodesic.js
+ * Transcription of Geodesic.[ch]pp into JavaScript.
+ *
+ * See the documentation for the C++ class.  The conversion is a literal
+ * conversion from C++.
+ *
+ * The algorithms are derived in
+ *
+ *    Charles F. F. Karney,
+ *    Algorithms for geodesics, J. Geodesy 87, 43-55 (2013);
+ *    https://doi.org/10.1007/s00190-012-0578-z
+ *    Addenda: https://geographiclib.sourceforge.io/geod-addenda.html
+ *
+ * Copyright (c) Charles Karney (2011-2017) <charles@karney.com> and licensed
+ * under the MIT/X11 License.  For more information, see
+ * https://geographiclib.sourceforge.io/
+ */
+
+// Load AFTER Math.js
+
+GeographicLib.Geodesic = {};
+GeographicLib.GeodesicLine = {};
+GeographicLib.PolygonArea = {};
+
+(function(
+  /**
+   * @exports GeographicLib/Geodesic
+   * @description Solve geodesic problems via the
+   *   {@link module:GeographicLib/Geodesic.Geodesic Geodesic} class.
+   */
+  g, l, p, m, c) {
+
+  var GEOGRAPHICLIB_GEODESIC_ORDER = 6,
+      nA1_ = GEOGRAPHICLIB_GEODESIC_ORDER,
+      nA2_ = GEOGRAPHICLIB_GEODESIC_ORDER,
+      nA3_ = GEOGRAPHICLIB_GEODESIC_ORDER,
+      nA3x_ = nA3_,
+      nC3x_, nC4x_,
+      maxit1_ = 20,
+      maxit2_ = maxit1_ + m.digits + 10,
+      tol0_ = m.epsilon,
+      tol1_ = 200 * tol0_,
+      tol2_ = Math.sqrt(tol0_),
+      tolb_ = tol0_ * tol1_,
+      xthresh_ = 1000 * tol2_,
+      CAP_NONE = 0,
+      CAP_ALL  = 0x1F,
+      CAP_MASK = CAP_ALL,
+      OUT_ALL  = 0x7F80,
+      astroid,
+      A1m1f_coeff, C1f_coeff, C1pf_coeff,
+      A2m1f_coeff, C2f_coeff,
+      A3_coeff, C3_coeff, C4_coeff;
+
+  g.tiny_ = Math.sqrt(Number.MIN_VALUE);
+  g.nC1_ = GEOGRAPHICLIB_GEODESIC_ORDER;
+  g.nC1p_ = GEOGRAPHICLIB_GEODESIC_ORDER;
+  g.nC2_ = GEOGRAPHICLIB_GEODESIC_ORDER;
+  g.nC3_ = GEOGRAPHICLIB_GEODESIC_ORDER;
+  g.nC4_ = GEOGRAPHICLIB_GEODESIC_ORDER;
+  nC3x_ = (g.nC3_ * (g.nC3_ - 1)) / 2;
+  nC4x_ = (g.nC4_ * (g.nC4_ + 1)) / 2;
+  g.CAP_C1   = 1<<0;
+  g.CAP_C1p  = 1<<1;
+  g.CAP_C2   = 1<<2;
+  g.CAP_C3   = 1<<3;
+  g.CAP_C4   = 1<<4;
+
+  g.NONE          = 0;
+  g.ARC           = 1<<6;
+  g.LATITUDE      = 1<<7  | CAP_NONE;
+  g.LONGITUDE     = 1<<8  | g.CAP_C3;
+  g.AZIMUTH       = 1<<9  | CAP_NONE;
+  g.DISTANCE      = 1<<10 | g.CAP_C1;
+  g.STANDARD      = g.LATITUDE | g.LONGITUDE | g.AZIMUTH | g.DISTANCE;
+  g.DISTANCE_IN   = 1<<11 | g.CAP_C1 | g.CAP_C1p;
+  g.REDUCEDLENGTH = 1<<12 | g.CAP_C1 | g.CAP_C2;
+  g.GEODESICSCALE = 1<<13 | g.CAP_C1 | g.CAP_C2;
+  g.AREA          = 1<<14 | g.CAP_C4;
+  g.ALL           = OUT_ALL| CAP_ALL;
+  g.LONG_UNROLL   = 1<<15;
+  g.OUT_MASK      = OUT_ALL| g.LONG_UNROLL;
+
+  g.SinCosSeries = function(sinp, sinx, cosx, c) {
+    // Evaluate
+    // y = sinp ? sum(c[i] * sin( 2*i    * x), i, 1, n) :
+    //            sum(c[i] * cos((2*i+1) * x), i, 0, n-1)
+    // using Clenshaw summation.  N.B. c[0] is unused for sin series
+    // Approx operation count = (n + 5) mult and (2 * n + 2) add
+    var k = c.length,           // Point to one beyond last element
+        n = k - (sinp ? 1 : 0),
+        ar = 2 * (cosx - sinx) * (cosx + sinx), // 2 * cos(2 * x)
+        y0 = n & 1 ? c[--k] : 0, y1 = 0;        // accumulators for sum
+    // Now n is even
+    n = Math.floor(n/2);
+    while (n--) {
+      // Unroll loop x 2, so accumulators return to their original role
+      y1 = ar * y0 - y1 + c[--k];
+      y0 = ar * y1 - y0 + c[--k];
+    }
+    return (sinp ? 2 * sinx * cosx * y0 : // sin(2 * x) * y0
+            cosx * (y0 - y1));            // cos(x) * (y0 - y1)
+  };
+
+  astroid = function(x, y) {
+    // Solve k^4+2*k^3-(x^2+y^2-1)*k^2-2*y^2*k-y^2 = 0 for positive
+    // root k.  This solution is adapted from Geocentric::Reverse.
+    var k,
+        p = m.sq(x),
+        q = m.sq(y),
+        r = (p + q - 1) / 6,
+        S, r2, r3, disc, u, T3, T, ang, v, uv, w;
+    if ( !(q === 0 && r <= 0) ) {
+      // Avoid possible division by zero when r = 0 by multiplying
+      // equations for s and t by r^3 and r, resp.
+      S = p * q / 4;            // S = r^3 * s
+      r2 = m.sq(r);
+      r3 = r * r2;
+      // The discriminant of the quadratic equation for T3.  This is
+      // zero on the evolute curve p^(1/3)+q^(1/3) = 1
+      disc = S * (S + 2 * r3);
+      u = r;
+      if (disc >= 0) {
+        T3 = S + r3;
+        // Pick the sign on the sqrt to maximize abs(T3).  This
+        // minimizes loss of precision due to cancellation.  The
+        // result is unchanged because of the way the T is used
+        // in definition of u.
+        T3 += T3 < 0 ? -Math.sqrt(disc) : Math.sqrt(disc);    // T3 = (r * t)^3
+        // N.B. cbrt always returns the real root.  cbrt(-8) = -2.
+        T = m.cbrt(T3);     // T = r * t
+        // T can be zero; but then r2 / T -> 0.
+        u += T + (T !== 0 ? r2 / T : 0);
+      } else {
+        // T is complex, but the way u is defined the result is real.
+        ang = Math.atan2(Math.sqrt(-disc), -(S + r3));
+        // There are three possible cube roots.  We choose the
+        // root which avoids cancellation.  Note that disc < 0
+        // implies that r < 0.
+        u += 2 * r * Math.cos(ang / 3);
+      }
+      v = Math.sqrt(m.sq(u) + q);       // guaranteed positive
+      // Avoid loss of accuracy when u < 0.
+      uv = u < 0 ? q / (v - u) : u + v; // u+v, guaranteed positive
+      w = (uv - q) / (2 * v);           // positive?
+      // Rearrange expression for k to avoid loss of accuracy due to
+      // subtraction.  Division by 0 not possible because uv > 0, w >= 0.
+      k = uv / (Math.sqrt(uv + m.sq(w)) + w); // guaranteed positive
+    } else {                                  // q == 0 && r <= 0
+      // y = 0 with |x| <= 1.  Handle this case directly.
+      // for y small, positive root is k = abs(y)/sqrt(1-x^2)
+      k = 0;
+    }
+    return k;
+  };
+
+  A1m1f_coeff = [
+    // (1-eps)*A1-1, polynomial in eps2 of order 3
+      +1, 4, 64, 0, 256
+  ];
+
+  // The scale factor A1-1 = mean value of (d/dsigma)I1 - 1
+  g.A1m1f = function(eps) {
+    var p = Math.floor(nA1_/2),
+        t = m.polyval(p, A1m1f_coeff, 0, m.sq(eps)) / A1m1f_coeff[p + 1];
+    return (t + eps) / (1 - eps);
+  };
+
+  C1f_coeff = [
+    // C1[1]/eps^1, polynomial in eps2 of order 2
+      -1, 6, -16, 32,
+    // C1[2]/eps^2, polynomial in eps2 of order 2
+      -9, 64, -128, 2048,
+    // C1[3]/eps^3, polynomial in eps2 of order 1
+      +9, -16, 768,
+    // C1[4]/eps^4, polynomial in eps2 of order 1
+      +3, -5, 512,
+    // C1[5]/eps^5, polynomial in eps2 of order 0
+      -7, 1280,
+    // C1[6]/eps^6, polynomial in eps2 of order 0
+      -7, 2048
+  ];
+
+  // The coefficients C1[l] in the Fourier expansion of B1
+  g.C1f = function(eps, c) {
+    var eps2 = m.sq(eps),
+        d = eps,
+        o = 0,
+        l, p;
+    for (l = 1; l <= g.nC1_; ++l) {     // l is index of C1p[l]
+      p = Math.floor((g.nC1_ - l) / 2); // order of polynomial in eps^2
+      c[l] = d * m.polyval(p, C1f_coeff, o, eps2) / C1f_coeff[o + p + 1];
+      o += p + 2;
+      d *= eps;
+    }
+  };
+
+  C1pf_coeff = [
+    // C1p[1]/eps^1, polynomial in eps2 of order 2
+      +205, -432, 768, 1536,
+    // C1p[2]/eps^2, polynomial in eps2 of order 2
+      +4005, -4736, 3840, 12288,
+    // C1p[3]/eps^3, polynomial in eps2 of order 1
+      -225, 116, 384,
+    // C1p[4]/eps^4, polynomial in eps2 of order 1
+      -7173, 2695, 7680,
+    // C1p[5]/eps^5, polynomial in eps2 of order 0
+      +3467, 7680,
+    // C1p[6]/eps^6, polynomial in eps2 of order 0
+      +38081, 61440
+  ];
+
+  // The coefficients C1p[l] in the Fourier expansion of B1p
+  g.C1pf = function(eps, c) {
+    var eps2 = m.sq(eps),
+        d = eps,
+        o = 0,
+        l, p;
+    for (l = 1; l <= g.nC1p_; ++l) {     // l is index of C1p[l]
+      p = Math.floor((g.nC1p_ - l) / 2); // order of polynomial in eps^2
+      c[l] = d * m.polyval(p, C1pf_coeff, o, eps2) / C1pf_coeff[o + p + 1];
+      o += p + 2;
+      d *= eps;
+    }
+  };
+
+  A2m1f_coeff = [
+    // (eps+1)*A2-1, polynomial in eps2 of order 3
+      -11, -28, -192, 0, 256
+  ];
+
+  // The scale factor A2-1 = mean value of (d/dsigma)I2 - 1
+  g.A2m1f = function(eps) {
+    var p = Math.floor(nA2_/2),
+        t = m.polyval(p, A2m1f_coeff, 0, m.sq(eps)) / A2m1f_coeff[p + 1];
+    return (t - eps) / (1 + eps);
+  };
+
+  C2f_coeff = [
+    // C2[1]/eps^1, polynomial in eps2 of order 2
+      +1, 2, 16, 32,
+    // C2[2]/eps^2, polynomial in eps2 of order 2
+      +35, 64, 384, 2048,
+    // C2[3]/eps^3, polynomial in eps2 of order 1
+      +15, 80, 768,
+    // C2[4]/eps^4, polynomial in eps2 of order 1
+      +7, 35, 512,
+    // C2[5]/eps^5, polynomial in eps2 of order 0
+      +63, 1280,
+    // C2[6]/eps^6, polynomial in eps2 of order 0
+      +77, 2048
+  ];
+
+  // The coefficients C2[l] in the Fourier expansion of B2
+  g.C2f = function(eps, c) {
+    var eps2 = m.sq(eps),
+        d = eps,
+        o = 0,
+        l, p;
+    for (l = 1; l <= g.nC2_; ++l) {     // l is index of C2[l]
+      p = Math.floor((g.nC2_ - l) / 2); // order of polynomial in eps^2
+      c[l] = d * m.polyval(p, C2f_coeff, o, eps2) / C2f_coeff[o + p + 1];
+      o += p + 2;
+      d *= eps;
+    }
+  };
+
+  /**
+   * @class
+   * @property {number} a the equatorial radius (meters).
+   * @property {number} f the flattening.
+   * @summary Initialize a Geodesic object for a specific ellipsoid.
+   * @classdesc Performs geodesic calculations on an ellipsoid of revolution.
+   *   The routines for solving the direct and inverse problems return an
+   *   object with some of the following fields set: lat1, lon1, azi1, lat2,
+   *   lon2, azi2, s12, a12, m12, M12, M21, S12.  See {@tutorial 2-interface},
+   *   "The results".
+   * @example
+   * var GeographicLib = require("geographiclib"),
+   *     geod = GeographicLib.Geodesic.WGS84;
+   * var inv = geod.Inverse(1,2,3,4);
+   * console.log("lat1 = " + inv.lat1 + ", lon1 = " + inv.lon1 +
+   *             ", lat2 = " + inv.lat2 + ", lon2 = " + inv.lon2 +
+   *             ",\nazi1 = " + inv.azi1 + ", azi2 = " + inv.azi2 +
+   *             ", s12 = " + inv.s12);
+   * @param {number} a the equatorial radius of the ellipsoid (meters).
+   * @param {number} f the flattening of the ellipsoid.  Setting f = 0 gives
+   *   a sphere (on which geodesics are great circles).  Negative f gives a
+   *   prolate ellipsoid.
+   * @throws an error if the parameters are illegal.
+   */
+  g.Geodesic = function(a, f) {
+    this.a = a;
+    this.f = f;
+    this._f1 = 1 - this.f;
+    this._e2 = this.f * (2 - this.f);
+    this._ep2 = this._e2 / m.sq(this._f1); // e2 / (1 - e2)
+    this._n = this.f / ( 2 - this.f);
+    this._b = this.a * this._f1;
+    // authalic radius squared
+    this._c2 = (m.sq(this.a) + m.sq(this._b) *
+                (this._e2 === 0 ? 1 :
+                 (this._e2 > 0 ? m.atanh(Math.sqrt(this._e2)) :
+                  Math.atan(Math.sqrt(-this._e2))) /
+                 Math.sqrt(Math.abs(this._e2))))/2;
+    // The sig12 threshold for "really short".  Using the auxiliary sphere
+    // solution with dnm computed at (bet1 + bet2) / 2, the relative error in
+    // the azimuth consistency check is sig12^2 * abs(f) * min(1, 1-f/2) / 2.
+    // (Error measured for 1/100 < b/a < 100 and abs(f) >= 1/1000.  For a given
+    // f and sig12, the max error occurs for lines near the pole.  If the old
+    // rule for computing dnm = (dn1 + dn2)/2 is used, then the error increases
+    // by a factor of 2.)  Setting this equal to epsilon gives sig12 = etol2.
+    // Here 0.1 is a safety factor (error decreased by 100) and max(0.001,
+    // abs(f)) stops etol2 getting too large in the nearly spherical case.
+    this._etol2 = 0.1 * tol2_ /
+      Math.sqrt( Math.max(0.001, Math.abs(this.f)) *
+                 Math.min(1.0, 1 - this.f/2) / 2 );
+    if (!(isFinite(this.a) && this.a > 0))
+      throw new Error("Equatorial radius is not positive");
+    if (!(isFinite(this._b) && this._b > 0))
+      throw new Error("Polar semi-axis is not positive");
+    this._A3x = new Array(nA3x_);
+    this._C3x = new Array(nC3x_);
+    this._C4x = new Array(nC4x_);
+    this.A3coeff();
+    this.C3coeff();
+    this.C4coeff();
+  };
+
+  A3_coeff = [
+    // A3, coeff of eps^5, polynomial in n of order 0
+      -3, 128,
+    // A3, coeff of eps^4, polynomial in n of order 1
+      -2, -3, 64,
+    // A3, coeff of eps^3, polynomial in n of order 2
+      -1, -3, -1, 16,
+    // A3, coeff of eps^2, polynomial in n of order 2
+      +3, -1, -2, 8,
+    // A3, coeff of eps^1, polynomial in n of order 1
+      +1, -1, 2,
+    // A3, coeff of eps^0, polynomial in n of order 0
+      +1, 1
+  ];
+
+  // The scale factor A3 = mean value of (d/dsigma)I3
+  g.Geodesic.prototype.A3coeff = function() {
+    var o = 0, k = 0,
+        j, p;
+    for (j = nA3_ - 1; j >= 0; --j) { // coeff of eps^j
+      p = Math.min(nA3_ - j - 1, j);  // order of polynomial in n
+      this._A3x[k++] = m.polyval(p, A3_coeff, o, this._n) /
+        A3_coeff[o + p + 1];
+      o += p + 2;
+    }
+  };
+
+  C3_coeff = [
+    // C3[1], coeff of eps^5, polynomial in n of order 0
+      +3, 128,
+    // C3[1], coeff of eps^4, polynomial in n of order 1
+      +2, 5, 128,
+    // C3[1], coeff of eps^3, polynomial in n of order 2
+      -1, 3, 3, 64,
+    // C3[1], coeff of eps^2, polynomial in n of order 2
+      -1, 0, 1, 8,
+    // C3[1], coeff of eps^1, polynomial in n of order 1
+      -1, 1, 4,
+    // C3[2], coeff of eps^5, polynomial in n of order 0
+      +5, 256,
+    // C3[2], coeff of eps^4, polynomial in n of order 1
+      +1, 3, 128,
+    // C3[2], coeff of eps^3, polynomial in n of order 2
+      -3, -2, 3, 64,
+    // C3[2], coeff of eps^2, polynomial in n of order 2
+      +1, -3, 2, 32,
+    // C3[3], coeff of eps^5, polynomial in n of order 0
+      +7, 512,
+    // C3[3], coeff of eps^4, polynomial in n of order 1
+      -10, 9, 384,
+    // C3[3], coeff of eps^3, polynomial in n of order 2
+      +5, -9, 5, 192,
+    // C3[4], coeff of eps^5, polynomial in n of order 0
+      +7, 512,
+    // C3[4], coeff of eps^4, polynomial in n of order 1
+      -14, 7, 512,
+    // C3[5], coeff of eps^5, polynomial in n of order 0
+      +21, 2560
+  ];
+
+  // The coefficients C3[l] in the Fourier expansion of B3
+  g.Geodesic.prototype.C3coeff = function() {
+    var o = 0, k = 0,
+        l, j, p;
+    for (l = 1; l < g.nC3_; ++l) {        // l is index of C3[l]
+      for (j = g.nC3_ - 1; j >= l; --j) { // coeff of eps^j
+        p = Math.min(g.nC3_ - j - 1, j);  // order of polynomial in n
+        this._C3x[k++] = m.polyval(p, C3_coeff, o, this._n) /
+          C3_coeff[o + p + 1];
+        o += p + 2;
+      }
+    }
+  };
+
+  C4_coeff = [
+    // C4[0], coeff of eps^5, polynomial in n of order 0
+      +97, 15015,
+    // C4[0], coeff of eps^4, polynomial in n of order 1
+      +1088, 156, 45045,
+    // C4[0], coeff of eps^3, polynomial in n of order 2
+      -224, -4784, 1573, 45045,
+    // C4[0], coeff of eps^2, polynomial in n of order 3
+      -10656, 14144, -4576, -858, 45045,
+    // C4[0], coeff of eps^1, polynomial in n of order 4
+      +64, 624, -4576, 6864, -3003, 15015,
+    // C4[0], coeff of eps^0, polynomial in n of order 5
+      +100, 208, 572, 3432, -12012, 30030, 45045,
+    // C4[1], coeff of eps^5, polynomial in n of order 0
+      +1, 9009,
+    // C4[1], coeff of eps^4, polynomial in n of order 1
+      -2944, 468, 135135,
+    // C4[1], coeff of eps^3, polynomial in n of order 2
+      +5792, 1040, -1287, 135135,
+    // C4[1], coeff of eps^2, polynomial in n of order 3
+      +5952, -11648, 9152, -2574, 135135,
+    // C4[1], coeff of eps^1, polynomial in n of order 4
+      -64, -624, 4576, -6864, 3003, 135135,
+    // C4[2], coeff of eps^5, polynomial in n of order 0
+      +8, 10725,
+    // C4[2], coeff of eps^4, polynomial in n of order 1
+      +1856, -936, 225225,
+    // C4[2], coeff of eps^3, polynomial in n of order 2
+      -8448, 4992, -1144, 225225,
+    // C4[2], coeff of eps^2, polynomial in n of order 3
+      -1440, 4160, -4576, 1716, 225225,
+    // C4[3], coeff of eps^5, polynomial in n of order 0
+      -136, 63063,
+    // C4[3], coeff of eps^4, polynomial in n of order 1
+      +1024, -208, 105105,
+    // C4[3], coeff of eps^3, polynomial in n of order 2
+      +3584, -3328, 1144, 315315,
+    // C4[4], coeff of eps^5, polynomial in n of order 0
+      -128, 135135,
+    // C4[4], coeff of eps^4, polynomial in n of order 1
+      -2560, 832, 405405,
+    // C4[5], coeff of eps^5, polynomial in n of order 0
+      +128, 99099
+  ];
+
+  g.Geodesic.prototype.C4coeff = function() {
+    var o = 0, k = 0,
+        l, j, p;
+    for (l = 0; l < g.nC4_; ++l) {        // l is index of C4[l]
+      for (j = g.nC4_ - 1; j >= l; --j) { // coeff of eps^j
+        p = g.nC4_ - j - 1;               // order of polynomial in n
+        this._C4x[k++] = m.polyval(p, C4_coeff, o, this._n) /
+          C4_coeff[o + p + 1];
+        o += p + 2;
+      }
+    }
+  };
+
+  g.Geodesic.prototype.A3f = function(eps) {
+    // Evaluate A3
+    return m.polyval(nA3x_ - 1, this._A3x, 0, eps);
+  };
+
+  g.Geodesic.prototype.C3f = function(eps, c) {
+    // Evaluate C3 coeffs
+    // Elements c[1] thru c[nC3_ - 1] are set
+    var mult = 1,
+        o = 0,
+        l, p;
+    for (l = 1; l < g.nC3_; ++l) { // l is index of C3[l]
+      p = g.nC3_ - l - 1;          // order of polynomial in eps
+      mult *= eps;
+      c[l] = mult * m.polyval(p, this._C3x, o, eps);
+      o += p + 1;
+    }
+  };
+
+  g.Geodesic.prototype.C4f = function(eps, c) {
+    // Evaluate C4 coeffs
+    // Elements c[0] thru c[g.nC4_ - 1] are set
+    var mult = 1,
+        o = 0,
+        l, p;
+    for (l = 0; l < g.nC4_; ++l) { // l is index of C4[l]
+      p = g.nC4_ - l - 1;          // order of polynomial in eps
+      c[l] = mult * m.polyval(p, this._C4x, o, eps);
+      o += p + 1;
+      mult *= eps;
+    }
+  };
+
+  // return s12b, m12b, m0, M12, M21
+  g.Geodesic.prototype.Lengths = function(eps, sig12,
+                                          ssig1, csig1, dn1, ssig2, csig2, dn2,
+                                          cbet1, cbet2, outmask,
+                                          C1a, C2a) {
+    // Return m12b = (reduced length)/_b; also calculate s12b =
+    // distance/_b, and m0 = coefficient of secular term in
+    // expression for reduced length.
+    outmask &= g.OUT_MASK;
+    var vals = {},
+        m0x = 0, J12 = 0, A1 = 0, A2 = 0,
+        B1, B2, l, csig12, t;
+    if (outmask & (g.DISTANCE | g.REDUCEDLENGTH | g.GEODESICSCALE)) {
+      A1 = g.A1m1f(eps);
+      g.C1f(eps, C1a);
+      if (outmask & (g.REDUCEDLENGTH | g.GEODESICSCALE)) {
+        A2 = g.A2m1f(eps);
+        g.C2f(eps, C2a);
+        m0x = A1 - A2;
+        A2 = 1 + A2;
+      }
+      A1 = 1 + A1;
+    }
+    if (outmask & g.DISTANCE) {
+      B1 = g.SinCosSeries(true, ssig2, csig2, C1a) -
+        g.SinCosSeries(true, ssig1, csig1, C1a);
+      // Missing a factor of _b
+      vals.s12b = A1 * (sig12 + B1);
+      if (outmask & (g.REDUCEDLENGTH | g.GEODESICSCALE)) {
+        B2 = g.SinCosSeries(true, ssig2, csig2, C2a) -
+          g.SinCosSeries(true, ssig1, csig1, C2a);
+        J12 = m0x * sig12 + (A1 * B1 - A2 * B2);
+      }
+    } else if (outmask & (g.REDUCEDLENGTH | g.GEODESICSCALE)) {
+      // Assume here that nC1_ >= nC2_
+      for (l = 1; l <= g.nC2_; ++l)
+        C2a[l] = A1 * C1a[l] - A2 * C2a[l];
+      J12 = m0x * sig12 + (g.SinCosSeries(true, ssig2, csig2, C2a) -
+                           g.SinCosSeries(true, ssig1, csig1, C2a));
+    }
+    if (outmask & g.REDUCEDLENGTH) {
+      vals.m0 = m0x;
+      // Missing a factor of _b.
+      // Add parens around (csig1 * ssig2) and (ssig1 * csig2) to ensure
+      // accurate cancellation in the case of coincident points.
+      vals.m12b = dn2 * (csig1 * ssig2) - dn1 * (ssig1 * csig2) -
+        csig1 * csig2 * J12;
+    }
+    if (outmask & g.GEODESICSCALE) {
+      csig12 = csig1 * csig2 + ssig1 * ssig2;
+      t = this._ep2 * (cbet1 - cbet2) * (cbet1 + cbet2) / (dn1 + dn2);
+      vals.M12 = csig12 + (t * ssig2 - csig2 * J12) * ssig1 / dn1;
+      vals.M21 = csig12 - (t * ssig1 - csig1 * J12) * ssig2 / dn2;
+    }
+    return vals;
+  };
+
+  // return sig12, salp1, calp1, salp2, calp2, dnm
+  g.Geodesic.prototype.InverseStart = function(sbet1, cbet1, dn1,
+                                               sbet2, cbet2, dn2,
+                                               lam12, slam12, clam12,
+                                               C1a, C2a) {
+    // Return a starting point for Newton's method in salp1 and calp1
+    // (function value is -1).  If Newton's method doesn't need to be
+    // used, return also salp2 and calp2 and function value is sig12.
+    // salp2, calp2 only updated if return val >= 0.
+    var vals = {},
+        // bet12 = bet2 - bet1 in [0, pi); bet12a = bet2 + bet1 in (-pi, 0]
+        sbet12 = sbet2 * cbet1 - cbet2 * sbet1,
+        cbet12 = cbet2 * cbet1 + sbet2 * sbet1,
+        sbet12a, shortline, omg12, sbetm2, somg12, comg12, t, ssig12, csig12,
+        x, y, lamscale, betscale, k2, eps, cbet12a, bet12a, m12b, m0, nvals,
+        k, omg12a, lam12x;
+    vals.sig12 = -1;        // Return value
+    // Volatile declaration needed to fix inverse cases
+    // 88.202499451857 0 -88.202499451857 179.981022032992859592
+    // 89.262080389218 0 -89.262080389218 179.992207982775375662
+    // 89.333123580033 0 -89.333123580032997687 179.99295812360148422
+    // which otherwise fail with g++ 4.4.4 x86 -O3
+    sbet12a = sbet2 * cbet1;
+    sbet12a += cbet2 * sbet1;
+
+    shortline = cbet12 >= 0 && sbet12 < 0.5 && cbet2 * lam12 < 0.5;
+    if (shortline) {
+      sbetm2 = m.sq(sbet1 + sbet2);
+      // sin((bet1+bet2)/2)^2
+      // =  (sbet1 + sbet2)^2 / ((sbet1 + sbet2)^2 + (cbet1 + cbet2)^2)
+      sbetm2 /= sbetm2 + m.sq(cbet1 + cbet2);
+      vals.dnm = Math.sqrt(1 + this._ep2 * sbetm2);
+      omg12 = lam12 / (this._f1 * vals.dnm);
+      somg12 = Math.sin(omg12); comg12 = Math.cos(omg12);
+    } else {
+      somg12 = slam12; comg12 = clam12;
+    }
+
+    vals.salp1 = cbet2 * somg12;
+    vals.calp1 = comg12 >= 0 ?
+      sbet12 + cbet2 * sbet1 * m.sq(somg12) / (1 + comg12) :
+      sbet12a - cbet2 * sbet1 * m.sq(somg12) / (1 - comg12);
+
+    ssig12 = m.hypot(vals.salp1, vals.calp1);
+    csig12 = sbet1 * sbet2 + cbet1 * cbet2 * comg12;
+    if (shortline && ssig12 < this._etol2) {
+      // really short lines
+      vals.salp2 = cbet1 * somg12;
+      vals.calp2 = sbet12 - cbet1 * sbet2 *
+        (comg12 >= 0 ? m.sq(somg12) / (1 + comg12) : 1 - comg12);
+      // norm(vals.salp2, vals.calp2);
+      t = m.hypot(vals.salp2, vals.calp2); vals.salp2 /= t; vals.calp2 /= t;
+      // Set return value
+      vals.sig12 = Math.atan2(ssig12, csig12);
+    } else if (Math.abs(this._n) > 0.1 || // Skip astroid calc if too eccentric
+               csig12 >= 0 ||
+               ssig12 >= 6 * Math.abs(this._n) * Math.PI * m.sq(cbet1)) {
+      // Nothing to do, zeroth order spherical approximation is OK
+    } else {
+      // Scale lam12 and bet2 to x, y coordinate system where antipodal
+      // point is at origin and singular point is at y = 0, x = -1.
+      lam12x = Math.atan2(-slam12, -clam12); // lam12 - pi
+      if (this.f >= 0) {       // In fact f == 0 does not get here
+        // x = dlong, y = dlat
+        k2 = m.sq(sbet1) * this._ep2;
+        eps = k2 / (2 * (1 + Math.sqrt(1 + k2)) + k2);
+        lamscale = this.f * cbet1 * this.A3f(eps) * Math.PI;
+        betscale = lamscale * cbet1;
+
+        x = lam12x / lamscale;
+        y = sbet12a / betscale;
+      } else {                  // f < 0
+        // x = dlat, y = dlong
+        cbet12a = cbet2 * cbet1 - sbet2 * sbet1;
+        bet12a = Math.atan2(sbet12a, cbet12a);
+        // In the case of lon12 = 180, this repeats a calculation made
+        // in Inverse.
+        nvals = this.Lengths(this._n, Math.PI + bet12a,
+                             sbet1, -cbet1, dn1, sbet2, cbet2, dn2,
+                             cbet1, cbet2, g.REDUCEDLENGTH, C1a, C2a);
+        m12b = nvals.m12b; m0 = nvals.m0;
+        x = -1 + m12b / (cbet1 * cbet2 * m0 * Math.PI);
+        betscale = x < -0.01 ? sbet12a / x :
+          -this.f * m.sq(cbet1) * Math.PI;
+        lamscale = betscale / cbet1;
+        y = lam12 / lamscale;
+      }
+
+      if (y > -tol1_ && x > -1 - xthresh_) {
+        // strip near cut
+        if (this.f >= 0) {
+          vals.salp1 = Math.min(1, -x);
+          vals.calp1 = -Math.sqrt(1 - m.sq(vals.salp1));
+        } else {
+          vals.calp1 = Math.max(x > -tol1_ ? 0 : -1, x);
+          vals.salp1 = Math.sqrt(1 - m.sq(vals.calp1));
+        }
+      } else {
+        // Estimate alp1, by solving the astroid problem.
+        //
+        // Could estimate alpha1 = theta + pi/2, directly, i.e.,
+        //   calp1 = y/k; salp1 = -x/(1+k);  for f >= 0
+        //   calp1 = x/(1+k); salp1 = -y/k;  for f < 0 (need to check)
+        //
+        // However, it's better to estimate omg12 from astroid and use
+        // spherical formula to compute alp1.  This reduces the mean number of
+        // Newton iterations for astroid cases from 2.24 (min 0, max 6) to 2.12
+        // (min 0 max 5).  The changes in the number of iterations are as
+        // follows:
+        //
+        // change percent
+        //    1       5
+        //    0      78
+        //   -1      16
+        //   -2       0.6
+        //   -3       0.04
+        //   -4       0.002
+        //
+        // The histogram of iterations is (m = number of iterations estimating
+        // alp1 directly, n = number of iterations estimating via omg12, total
+        // number of trials = 148605):
+        //
+        //  iter    m      n
+        //    0   148    186
+        //    1 13046  13845
+        //    2 93315 102225
+        //    3 36189  32341
+        //    4  5396      7
+        //    5   455      1
+        //    6    56      0
+        //
+        // Because omg12 is near pi, estimate work with omg12a = pi - omg12
+        k = astroid(x, y);
+        omg12a = lamscale * ( this.f >= 0 ? -x * k/(1 + k) : -y * (1 + k)/k );
+        somg12 = Math.sin(omg12a); comg12 = -Math.cos(omg12a);
+        // Update spherical estimate of alp1 using omg12 instead of
+        // lam12
+        vals.salp1 = cbet2 * somg12;
+        vals.calp1 = sbet12a -
+          cbet2 * sbet1 * m.sq(somg12) / (1 - comg12);
+      }
+    }
+    // Sanity check on starting guess.  Backwards check allows NaN through.
+    if (!(vals.salp1 <= 0.0)) {
+      // norm(vals.salp1, vals.calp1);
+      t = m.hypot(vals.salp1, vals.calp1); vals.salp1 /= t; vals.calp1 /= t;
+    } else {
+      vals.salp1 = 1; vals.calp1 = 0;
+    }
+    return vals;
+  };
+
+  // return lam12, salp2, calp2, sig12, ssig1, csig1, ssig2, csig2, eps,
+  // domg12, dlam12,
+  g.Geodesic.prototype.Lambda12 = function(sbet1, cbet1, dn1,
+                                           sbet2, cbet2, dn2,
+                                           salp1, calp1, slam120, clam120,
+                                           diffp, C1a, C2a, C3a) {
+    var vals = {},
+        t, salp0, calp0,
+        somg1, comg1, somg2, comg2, somg12, comg12, B312, eta, k2, nvals;
+    if (sbet1 === 0 && calp1 === 0)
+      // Break degeneracy of equatorial line.  This case has already been
+      // handled.
+      calp1 = -g.tiny_;
+
+    // sin(alp1) * cos(bet1) = sin(alp0)
+    salp0 = salp1 * cbet1;
+    calp0 = m.hypot(calp1, salp1 * sbet1); // calp0 > 0
+
+    // tan(bet1) = tan(sig1) * cos(alp1)
+    // tan(omg1) = sin(alp0) * tan(sig1) = tan(omg1)=tan(alp1)*sin(bet1)
+    vals.ssig1 = sbet1; somg1 = salp0 * sbet1;
+    vals.csig1 = comg1 = calp1 * cbet1;
+    // norm(vals.ssig1, vals.csig1);
+    t = m.hypot(vals.ssig1, vals.csig1); vals.ssig1 /= t; vals.csig1 /= t;
+    // norm(somg1, comg1); -- don't need to normalize!
+
+    // Enforce symmetries in the case abs(bet2) = -bet1.  Need to be careful
+    // about this case, since this can yield singularities in the Newton
+    // iteration.
+    // sin(alp2) * cos(bet2) = sin(alp0)
+    vals.salp2 = cbet2 !== cbet1 ? salp0 / cbet2 : salp1;
+    // calp2 = sqrt(1 - sq(salp2))
+    //       = sqrt(sq(calp0) - sq(sbet2)) / cbet2
+    // and subst for calp0 and rearrange to give (choose positive sqrt
+    // to give alp2 in [0, pi/2]).
+    vals.calp2 = cbet2 !== cbet1 || Math.abs(sbet2) !== -sbet1 ?
+      Math.sqrt(m.sq(calp1 * cbet1) + (cbet1 < -sbet1 ?
+                                       (cbet2 - cbet1) * (cbet1 + cbet2) :
+                                       (sbet1 - sbet2) * (sbet1 + sbet2))) /
+      cbet2 : Math.abs(calp1);
+    // tan(bet2) = tan(sig2) * cos(alp2)
+    // tan(omg2) = sin(alp0) * tan(sig2).
+    vals.ssig2 = sbet2; somg2 = salp0 * sbet2;
+    vals.csig2 = comg2 = vals.calp2 * cbet2;
+    // norm(vals.ssig2, vals.csig2);
+    t = m.hypot(vals.ssig2, vals.csig2); vals.ssig2 /= t; vals.csig2 /= t;
+    // norm(somg2, comg2); -- don't need to normalize!
+
+    // sig12 = sig2 - sig1, limit to [0, pi]
+    vals.sig12 = Math.atan2(Math.max(0, vals.csig1 * vals.ssig2 -
+                                        vals.ssig1 * vals.csig2),
+                                        vals.csig1 * vals.csig2 +
+                                        vals.ssig1 * vals.ssig2);
+
+    // omg12 = omg2 - omg1, limit to [0, pi]
+    somg12 = Math.max(0, comg1 * somg2 - somg1 * comg2);
+    comg12 =             comg1 * comg2 + somg1 * somg2;
+    // eta = omg12 - lam120
+    eta = Math.atan2(somg12 * clam120 - comg12 * slam120,
+                     comg12 * clam120 + somg12 * slam120);
+    k2 = m.sq(calp0) * this._ep2;
+    vals.eps = k2 / (2 * (1 + Math.sqrt(1 + k2)) + k2);
+    this.C3f(vals.eps, C3a);
+    B312 = (g.SinCosSeries(true, vals.ssig2, vals.csig2, C3a) -
+            g.SinCosSeries(true, vals.ssig1, vals.csig1, C3a));
+    vals.domg12 =  -this.f * this.A3f(vals.eps) * salp0 * (vals.sig12 + B312);
+    vals.lam12 = eta + vals.domg12;
+    if (diffp) {
+      if (vals.calp2 === 0)
+        vals.dlam12 = -2 * this._f1 * dn1 / sbet1;
+      else {
+        nvals = this.Lengths(vals.eps, vals.sig12,
+                             vals.ssig1, vals.csig1, dn1,
+                             vals.ssig2, vals.csig2, dn2,
+                             cbet1, cbet2, g.REDUCEDLENGTH, C1a, C2a);
+        vals.dlam12 = nvals.m12b;
+        vals.dlam12 *= this._f1 / (vals.calp2 * cbet2);
+      }
+    }
+    return vals;
+  };
+
+  /**
+   * @summary Solve the inverse geodesic problem.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} lat2 the latitude of the second point in degrees.
+   * @param {number} lon2 the longitude of the second point in degrees.
+   * @param {bitmask} [outmask = STANDARD] which results to include.
+   * @returns {object} the requested results
+   * @description The lat1, lon1, lat2, lon2, and a12 fields of the result are
+   *   always set.  For details on the outmask parameter, see {@tutorial
+   *   2-interface}, "The outmask and caps parameters".
+   */
+  g.Geodesic.prototype.Inverse = function(lat1, lon1, lat2, lon2, outmask) {
+    var r, vals;
+    if (!outmask) outmask = g.STANDARD;
+    if (outmask === g.LONG_UNROLL) outmask |= g.STANDARD;
+    outmask &= g.OUT_MASK;
+    r = this.InverseInt(lat1, lon1, lat2, lon2, outmask);
+    vals = r.vals;
+    if (outmask & g.AZIMUTH) {
+      vals.azi1 = m.atan2d(r.salp1, r.calp1);
+      vals.azi2 = m.atan2d(r.salp2, r.calp2);
+    }
+    return vals;
+  };
+
+  g.Geodesic.prototype.InverseInt = function(lat1, lon1, lat2, lon2, outmask) {
+    var vals = {},
+        lon12, lon12s, lonsign, t, swapp, latsign,
+        sbet1, cbet1, sbet2, cbet2, s12x, m12x,
+        dn1, dn2, lam12, slam12, clam12,
+        sig12, calp1, salp1, calp2, salp2, C1a, C2a, C3a, meridian, nvals,
+        ssig1, csig1, ssig2, csig2, eps, omg12, dnm,
+        numit, salp1a, calp1a, salp1b, calp1b,
+        tripn, tripb, v, dv, dalp1, sdalp1, cdalp1, nsalp1,
+        lengthmask, salp0, calp0, alp12, k2, A4, C4a, B41, B42,
+        somg12, comg12, domg12, dbet1, dbet2, salp12, calp12, sdomg12, cdomg12;
+    // Compute longitude difference (AngDiff does this carefully).  Result is
+    // in [-180, 180] but -180 is only for west-going geodesics.  180 is for
+    // east-going and meridional geodesics.
+    vals.lat1 = lat1 = m.LatFix(lat1); vals.lat2 = lat2 = m.LatFix(lat2);
+    // If really close to the equator, treat as on equator.
+    lat1 = m.AngRound(lat1);
+    lat2 = m.AngRound(lat2);
+    lon12 = m.AngDiff(lon1, lon2); lon12s = lon12.t; lon12 = lon12.s;
+    if (outmask & g.LONG_UNROLL) {
+      vals.lon1 = lon1; vals.lon2 = (lon1 + lon12) + lon12s;
+    } else {
+      vals.lon1 = m.AngNormalize(lon1); vals.lon2 = m.AngNormalize(lon2);
+    }
+    // Make longitude difference positive.
+    lonsign = lon12 >= 0 ? 1 : -1;
+    // If very close to being on the same half-meridian, then make it so.
+    lon12 = lonsign * m.AngRound(lon12);
+    lon12s = m.AngRound((180 - lon12) - lonsign * lon12s);
+    lam12 = lon12 * m.degree;
+    t = m.sincosd(lon12 > 90 ? lon12s : lon12);
+    slam12 = t.s; clam12 = (lon12 > 90 ? -1 : 1) * t.c;
+
+    // Swap points so that point with higher (abs) latitude is point 1
+    // If one latitude is a nan, then it becomes lat1.
+    swapp = Math.abs(lat1) < Math.abs(lat2) ? -1 : 1;
+    if (swapp < 0) {
+      lonsign *= -1;
+      t = lat1;
+      lat1 = lat2;
+      lat2 = t;
+      // swap(lat1, lat2);
+    }
+    // Make lat1 <= 0
+    latsign = lat1 < 0 ? 1 : -1;
+    lat1 *= latsign;
+    lat2 *= latsign;
+    // Now we have
+    //
+    //     0 <= lon12 <= 180
+    //     -90 <= lat1 <= 0
+    //     lat1 <= lat2 <= -lat1
+    //
+    // longsign, swapp, latsign register the transformation to bring the
+    // coordinates to this canonical form.  In all cases, 1 means no change was
+    // made.  We make these transformations so that there are few cases to
+    // check, e.g., on verifying quadrants in atan2.  In addition, this
+    // enforces some symmetries in the results returned.
+
+    t = m.sincosd(lat1); sbet1 = this._f1 * t.s; cbet1 = t.c;
+    // norm(sbet1, cbet1);
+    t = m.hypot(sbet1, cbet1); sbet1 /= t; cbet1 /= t;
+    // Ensure cbet1 = +epsilon at poles
+    cbet1 = Math.max(g.tiny_, cbet1);
+
+    t = m.sincosd(lat2); sbet2 = this._f1 * t.s; cbet2 = t.c;
+    // norm(sbet2, cbet2);
+    t = m.hypot(sbet2, cbet2); sbet2 /= t; cbet2 /= t;
+    // Ensure cbet2 = +epsilon at poles
+    cbet2 = Math.max(g.tiny_, cbet2);
+
+    // If cbet1 < -sbet1, then cbet2 - cbet1 is a sensitive measure of the
+    // |bet1| - |bet2|.  Alternatively (cbet1 >= -sbet1), abs(sbet2) + sbet1 is
+    // a better measure.  This logic is used in assigning calp2 in Lambda12.
+    // Sometimes these quantities vanish and in that case we force bet2 = +/-
+    // bet1 exactly.  An example where is is necessary is the inverse problem
+    // 48.522876735459 0 -48.52287673545898293 179.599720456223079643
+    // which failed with Visual Studio 10 (Release and Debug)
+
+    if (cbet1 < -sbet1) {
+      if (cbet2 === cbet1)
+        sbet2 = sbet2 < 0 ? sbet1 : -sbet1;
+    } else {
+      if (Math.abs(sbet2) === -sbet1)
+        cbet2 = cbet1;
+    }
+
+    dn1 = Math.sqrt(1 + this._ep2 * m.sq(sbet1));
+    dn2 = Math.sqrt(1 + this._ep2 * m.sq(sbet2));
+
+    // index zero elements of these arrays are unused
+    C1a = new Array(g.nC1_ + 1);
+    C2a = new Array(g.nC2_ + 1);
+    C3a = new Array(g.nC3_);
+
+    meridian = lat1 === -90 || slam12 === 0;
+    if (meridian) {
+
+      // Endpoints are on a single full meridian, so the geodesic might
+      // lie on a meridian.
+
+      calp1 = clam12; salp1 = slam12; // Head to the target longitude
+      calp2 = 1; salp2 = 0;           // At the target we're heading north
+
+      // tan(bet) = tan(sig) * cos(alp)
+      ssig1 = sbet1; csig1 = calp1 * cbet1;
+      ssig2 = sbet2; csig2 = calp2 * cbet2;
+
+      // sig12 = sig2 - sig1
+      sig12 = Math.atan2(Math.max(0, csig1 * ssig2 - ssig1 * csig2),
+                                     csig1 * csig2 + ssig1 * ssig2);
+      nvals = this.Lengths(this._n, sig12,
+                           ssig1, csig1, dn1, ssig2, csig2, dn2, cbet1, cbet2,
+                           outmask | g.DISTANCE | g.REDUCEDLENGTH,
+                           C1a, C2a);
+      s12x = nvals.s12b;
+      m12x = nvals.m12b;
+      // Ignore m0
+      if (outmask & g.GEODESICSCALE) {
+        vals.M12 = nvals.M12;
+        vals.M21 = nvals.M21;
+      }
+      // Add the check for sig12 since zero length geodesics might yield
+      // m12 < 0.  Test case was
+      //
+      //    echo 20.001 0 20.001 0 | GeodSolve -i
+      //
+      // In fact, we will have sig12 > pi/2 for meridional geodesic
+      // which is not a shortest path.
+      if (sig12 < 1 || m12x >= 0) {
+        // Need at least 2, to handle 90 0 90 180
+        if (sig12 < 3 * g.tiny_)
+          sig12 = m12x = s12x = 0;
+        m12x *= this._b;
+        s12x *= this._b;
+        vals.a12 = sig12 / m.degree;
+      } else
+        // m12 < 0, i.e., prolate and too close to anti-podal
+        meridian = false;
+    }
+
+    somg12 = 2;
+    if (!meridian &&
+        sbet1 === 0 &&           // and sbet2 == 0
+        (this.f <= 0 || lon12s >= this.f * 180)) {
+
+      // Geodesic runs along equator
+      calp1 = calp2 = 0; salp1 = salp2 = 1;
+      s12x = this.a * lam12;
+      sig12 = omg12 = lam12 / this._f1;
+      m12x = this._b * Math.sin(sig12);
+      if (outmask & g.GEODESICSCALE)
+        vals.M12 = vals.M21 = Math.cos(sig12);
+      vals.a12 = lon12 / this._f1;
+
+    } else if (!meridian) {
+
+      // Now point1 and point2 belong within a hemisphere bounded by a
+      // meridian and geodesic is neither meridional or equatorial.
+
+      // Figure a starting point for Newton's method
+      nvals = this.InverseStart(sbet1, cbet1, dn1, sbet2, cbet2, dn2,
+                                lam12, slam12, clam12, C1a, C2a);
+      sig12 = nvals.sig12;
+      salp1 = nvals.salp1;
+      calp1 = nvals.calp1;
+
+      if (sig12 >= 0) {
+        salp2 = nvals.salp2;
+        calp2 = nvals.calp2;
+        // Short lines (InverseStart sets salp2, calp2, dnm)
+
+        dnm = nvals.dnm;
+        s12x = sig12 * this._b * dnm;
+        m12x = m.sq(dnm) * this._b * Math.sin(sig12 / dnm);
+        if (outmask & g.GEODESICSCALE)
+          vals.M12 = vals.M21 = Math.cos(sig12 / dnm);
+        vals.a12 = sig12 / m.degree;
+        omg12 = lam12 / (this._f1 * dnm);
+      } else {
+
+        // Newton's method.  This is a straightforward solution of f(alp1) =
+        // lambda12(alp1) - lam12 = 0 with one wrinkle.  f(alp) has exactly one
+        // root in the interval (0, pi) and its derivative is positive at the
+        // root.  Thus f(alp) is positive for alp > alp1 and negative for alp <
+        // alp1.  During the course of the iteration, a range (alp1a, alp1b) is
+        // maintained which brackets the root and with each evaluation of
+        // f(alp) the range is shrunk if possible.  Newton's method is
+        // restarted whenever the derivative of f is negative (because the new
+        // value of alp1 is then further from the solution) or if the new
+        // estimate of alp1 lies outside (0,pi); in this case, the new starting
+        // guess is taken to be (alp1a + alp1b) / 2.
+        numit = 0;
+        // Bracketing range
+        salp1a = g.tiny_; calp1a = 1; salp1b = g.tiny_; calp1b = -1;
+        for (tripn = false, tripb = false; numit < maxit2_; ++numit) {
+          // the WGS84 test set: mean = 1.47, sd = 1.25, max = 16
+          // WGS84 and random input: mean = 2.85, sd = 0.60
+          nvals = this.Lambda12(sbet1, cbet1, dn1, sbet2, cbet2, dn2,
+                                salp1, calp1, slam12, clam12, numit < maxit1_,
+                                C1a, C2a, C3a);
+          v = nvals.lam12;
+          salp2 = nvals.salp2;
+          calp2 = nvals.calp2;
+          sig12 = nvals.sig12;
+          ssig1 = nvals.ssig1;
+          csig1 = nvals.csig1;
+          ssig2 = nvals.ssig2;
+          csig2 = nvals.csig2;
+          eps = nvals.eps;
+          domg12 = nvals.domg12;
+          dv = nvals.dlam12;
+
+          // 2 * tol0 is approximately 1 ulp for a number in [0, pi].
+          // Reversed test to allow escape with NaNs
+          if (tripb || !(Math.abs(v) >= (tripn ? 8 : 1) * tol0_))
+            break;
+          // Update bracketing values
+          if (v > 0 && (numit < maxit1_ || calp1/salp1 > calp1b/salp1b)) {
+            salp1b = salp1; calp1b = calp1;
+          } else if (v < 0 &&
+                     (numit < maxit1_ || calp1/salp1 < calp1a/salp1a)) {
+            salp1a = salp1; calp1a = calp1;
+          }
+          if (numit < maxit1_ && dv > 0) {
+            dalp1 = -v/dv;
+            sdalp1 = Math.sin(dalp1); cdalp1 = Math.cos(dalp1);
+            nsalp1 = salp1 * cdalp1 + calp1 * sdalp1;
+            if (nsalp1 > 0 && Math.abs(dalp1) < Math.PI) {
+              calp1 = calp1 * cdalp1 - salp1 * sdalp1;
+              salp1 = nsalp1;
+              // norm(salp1, calp1);
+              t = m.hypot(salp1, calp1); salp1 /= t; calp1 /= t;
+              // In some regimes we don't get quadratic convergence because
+              // slope -> 0.  So use convergence conditions based on epsilon
+              // instead of sqrt(epsilon).
+              tripn = Math.abs(v) <= 16 * tol0_;
+              continue;
+            }
+          }
+          // Either dv was not positive or updated value was outside legal
+          // range.  Use the midpoint of the bracket as the next estimate.
+          // This mechanism is not needed for the WGS84 ellipsoid, but it does
+          // catch problems with more eccentric ellipsoids.  Its efficacy is
+          // such for the WGS84 test set with the starting guess set to alp1 =
+          // 90deg:
+          // the WGS84 test set: mean = 5.21, sd = 3.93, max = 24
+          // WGS84 and random input: mean = 4.74, sd = 0.99
+          salp1 = (salp1a + salp1b)/2;
+          calp1 = (calp1a + calp1b)/2;
+          // norm(salp1, calp1);
+          t = m.hypot(salp1, calp1); salp1 /= t; calp1 /= t;
+          tripn = false;
+          tripb = (Math.abs(salp1a - salp1) + (calp1a - calp1) < tolb_ ||
+                   Math.abs(salp1 - salp1b) + (calp1 - calp1b) < tolb_);
+        }
+        lengthmask = outmask |
+            (outmask & (g.REDUCEDLENGTH | g.GEODESICSCALE) ?
+             g.DISTANCE : g.NONE);
+        nvals = this.Lengths(eps, sig12,
+                             ssig1, csig1, dn1, ssig2, csig2, dn2,
+                             cbet1, cbet2,
+                             lengthmask, C1a, C2a);
+        s12x = nvals.s12b;
+        m12x = nvals.m12b;
+        // Ignore m0
+        if (outmask & g.GEODESICSCALE) {
+          vals.M12 = nvals.M12;
+          vals.M21 = nvals.M21;
+        }
+        m12x *= this._b;
+        s12x *= this._b;
+        vals.a12 = sig12 / m.degree;
+        if (outmask & g.AREA) {
+          // omg12 = lam12 - domg12
+          sdomg12 = Math.sin(domg12); cdomg12 = Math.cos(domg12);
+          somg12 = slam12 * cdomg12 - clam12 * sdomg12;
+          comg12 = clam12 * cdomg12 + slam12 * sdomg12;
+        }
+      }
+    }
+
+    if (outmask & g.DISTANCE)
+      vals.s12 = 0 + s12x;      // Convert -0 to 0
+
+    if (outmask & g.REDUCEDLENGTH)
+      vals.m12 = 0 + m12x;      // Convert -0 to 0
+
+    if (outmask & g.AREA) {
+      // From Lambda12: sin(alp1) * cos(bet1) = sin(alp0)
+      salp0 = salp1 * cbet1;
+      calp0 = m.hypot(calp1, salp1 * sbet1); // calp0 > 0
+      if (calp0 !== 0 && salp0 !== 0) {
+        // From Lambda12: tan(bet) = tan(sig) * cos(alp)
+        ssig1 = sbet1; csig1 = calp1 * cbet1;
+        ssig2 = sbet2; csig2 = calp2 * cbet2;
+        k2 = m.sq(calp0) * this._ep2;
+        eps = k2 / (2 * (1 + Math.sqrt(1 + k2)) + k2);
+        // Multiplier = a^2 * e^2 * cos(alpha0) * sin(alpha0).
+        A4 = m.sq(this.a) * calp0 * salp0 * this._e2;
+        // norm(ssig1, csig1);
+        t = m.hypot(ssig1, csig1); ssig1 /= t; csig1 /= t;
+        // norm(ssig2, csig2);
+        t = m.hypot(ssig2, csig2); ssig2 /= t; csig2 /= t;
+        C4a = new Array(g.nC4_);
+        this.C4f(eps, C4a);
+        B41 = g.SinCosSeries(false, ssig1, csig1, C4a);
+        B42 = g.SinCosSeries(false, ssig2, csig2, C4a);
+        vals.S12 = A4 * (B42 - B41);
+      } else
+        // Avoid problems with indeterminate sig1, sig2 on equator
+        vals.S12 = 0;
+      if (!meridian && somg12 > 1) {
+        somg12 = Math.sin(omg12); comg12 = Math.cos(omg12);
+      }
+      if (!meridian &&
+          comg12 > -0.7071 &&      // Long difference not too big
+          sbet2 - sbet1 < 1.75) { // Lat difference not too big
+        // Use tan(Gamma/2) = tan(omg12/2)
+        // * (tan(bet1/2)+tan(bet2/2))/(1+tan(bet1/2)*tan(bet2/2))
+        // with tan(x/2) = sin(x)/(1+cos(x))
+        domg12 = 1 + comg12; dbet1 = 1 + cbet1; dbet2 = 1 + cbet2;
+        alp12 = 2 * Math.atan2( somg12 * (sbet1*dbet2 + sbet2*dbet1),
+                                domg12 * (sbet1*sbet2 + dbet1*dbet2) );
+      } else {
+        // alp12 = alp2 - alp1, used in atan2 so no need to normalize
+        salp12 = salp2 * calp1 - calp2 * salp1;
+        calp12 = calp2 * calp1 + salp2 * salp1;
+        // The right thing appears to happen if alp1 = +/-180 and alp2 = 0, viz
+        // salp12 = -0 and alp12 = -180.  However this depends on the sign
+        // being attached to 0 correctly.  The following ensures the correct
+        // behavior.
+        if (salp12 === 0 && calp12 < 0) {
+          salp12 = g.tiny_ * calp1;
+          calp12 = -1;
+        }
+        alp12 = Math.atan2(salp12, calp12);
+      }
+      vals.S12 += this._c2 * alp12;
+      vals.S12 *= swapp * lonsign * latsign;
+      // Convert -0 to 0
+      vals.S12 += 0;
+    }
+
+    // Convert calp, salp to azimuth accounting for lonsign, swapp, latsign.
+    if (swapp < 0) {
+      t = salp1;
+      salp1 = salp2;
+      salp2 = t;
+      // swap(salp1, salp2);
+      t = calp1;
+      calp1 = calp2;
+      calp2 = t;
+      // swap(calp1, calp2);
+      if (outmask & g.GEODESICSCALE) {
+        t = vals.M12;
+        vals.M12 = vals.M21;
+        vals.M21 = t;
+        // swap(vals.M12, vals.M21);
+      }
+    }
+
+    salp1 *= swapp * lonsign; calp1 *= swapp * latsign;
+    salp2 *= swapp * lonsign; calp2 *= swapp * latsign;
+
+    return {vals: vals,
+            salp1: salp1, calp1: calp1,
+            salp2: salp2, calp2: calp2};
+  };
+
+  /**
+   * @summary Solve the general direct geodesic problem.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} azi1 the azimuth at the first point in degrees.
+   * @param {bool} arcmode is the next parameter an arc length?
+   * @param {number} s12_a12 the (arcmode ? arc length : distance) from the
+   *   first point to the second in (arcmode ? degrees : meters).
+   * @param {bitmask} [outmask = STANDARD] which results to include.
+   * @returns {object} the requested results.
+   * @description The lat1, lon1, azi1, and a12 fields of the result are always
+   *   set; s12 is included if arcmode is false.  For details on the outmask
+   *   parameter, see {@tutorial 2-interface}, "The outmask and caps
+   *   parameters".
+   */
+  g.Geodesic.prototype.GenDirect = function(lat1, lon1, azi1,
+                                            arcmode, s12_a12, outmask) {
+    var line;
+    if (!outmask) outmask = g.STANDARD;
+    else if (outmask === g.LONG_UNROLL) outmask |= g.STANDARD;
+    // Automatically supply DISTANCE_IN if necessary
+    if (!arcmode) outmask |= g.DISTANCE_IN;
+    line = new l.GeodesicLine(this, lat1, lon1, azi1, outmask);
+    return line.GenPosition(arcmode, s12_a12, outmask);
+  };
+
+  /**
+   * @summary Solve the direct geodesic problem.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} azi1 the azimuth at the first point in degrees.
+   * @param {number} s12 the distance from the first point to the second in
+   *   meters.
+   * @param {bitmask} [outmask = STANDARD] which results to include.
+   * @returns {object} the requested results.
+   * @description The lat1, lon1, azi1, s12, and a12 fields of the result are
+   *   always set.  For details on the outmask parameter, see {@tutorial
+   *   2-interface}, "The outmask and caps parameters".
+   */
+  g.Geodesic.prototype.Direct = function(lat1, lon1, azi1, s12, outmask) {
+    return this.GenDirect(lat1, lon1, azi1, false, s12, outmask);
+  };
+
+  /**
+   * @summary Solve the direct geodesic problem with arc length.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} azi1 the azimuth at the first point in degrees.
+   * @param {number} a12 the arc length from the first point to the second in
+   *   degrees.
+   * @param {bitmask} [outmask = STANDARD] which results to include.
+   * @returns {object} the requested results.
+   * @description The lat1, lon1, azi1, and a12 fields of the result are
+   *   always set.  For details on the outmask parameter, see {@tutorial
+   *   2-interface}, "The outmask and caps parameters".
+   */
+  g.Geodesic.prototype.ArcDirect = function(lat1, lon1, azi1, a12, outmask) {
+    return this.GenDirect(lat1, lon1, azi1, true, a12, outmask);
+  };
+
+  /**
+   * @summary Create a {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} object.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} azi1 the azimuth at the first point in degrees.
+   *   degrees.
+   * @param {bitmask} [caps = STANDARD | DISTANCE_IN] which capabilities to
+   *   include.
+   * @returns {object} the
+   *   {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} object
+   * @description For details on the caps parameter, see {@tutorial
+   *   2-interface}, "The outmask and caps parameters".
+   */
+  g.Geodesic.prototype.Line = function(lat1, lon1, azi1, caps) {
+    return new l.GeodesicLine(this, lat1, lon1, azi1, caps);
+  };
+
+  /**
+   * @summary Define a {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} in terms of the direct geodesic problem specified in terms
+   *   of distance.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} azi1 the azimuth at the first point in degrees.
+   *   degrees.
+   * @param {number} s12 the distance between point 1 and point 2 (meters); it
+   *   can be negative.
+   * @param {bitmask} [caps = STANDARD | DISTANCE_IN] which capabilities to
+   *   include.
+   * @returns {object} the
+   *   {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} object
+   * @description This function sets point 3 of the GeodesicLine to correspond
+   *   to point 2 of the direct geodesic problem.  For details on the caps
+   *   parameter, see {@tutorial 2-interface}, "The outmask and caps
+   *   parameters".
+   */
+  g.Geodesic.prototype.DirectLine = function(lat1, lon1, azi1, s12, caps) {
+    return this.GenDirectLine(lat1, lon1, azi1, false, s12, caps);
+  };
+
+  /**
+   * @summary Define a {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} in terms of the direct geodesic problem specified in terms
+   *   of arc length.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} azi1 the azimuth at the first point in degrees.
+   *   degrees.
+   * @param {number} a12 the arc length between point 1 and point 2 (degrees);
+   *   it can be negative.
+   * @param {bitmask} [caps = STANDARD | DISTANCE_IN] which capabilities to
+   *   include.
+   * @returns {object} the
+   *   {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} object
+   * @description This function sets point 3 of the GeodesicLine to correspond
+   *   to point 2 of the direct geodesic problem.  For details on the caps
+   *   parameter, see {@tutorial 2-interface}, "The outmask and caps
+   *   parameters".
+   */
+  g.Geodesic.prototype.ArcDirectLine = function(lat1, lon1, azi1, a12, caps) {
+    return this.GenDirectLine(lat1, lon1, azi1, true, a12, caps);
+  };
+
+  /**
+   * @summary Define a {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} in terms of the direct geodesic problem specified in terms
+   *   of either distance or arc length.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} azi1 the azimuth at the first point in degrees.
+   *   degrees.
+   * @param {bool} arcmode boolean flag determining the meaning of the
+   *   s12_a12.
+   * @param {number} s12_a12 if arcmode is false, this is the distance between
+   *   point 1 and point 2 (meters); otherwise it is the arc length between
+   *   point 1 and point 2 (degrees); it can be negative.
+   * @param {bitmask} [caps = STANDARD | DISTANCE_IN] which capabilities to
+   *   include.
+   * @returns {object} the
+   *   {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} object
+   * @description This function sets point 3 of the GeodesicLine to correspond
+   *   to point 2 of the direct geodesic problem.  For details on the caps
+   *   parameter, see {@tutorial 2-interface}, "The outmask and caps
+   *   parameters".
+   */
+  g.Geodesic.prototype.GenDirectLine = function(lat1, lon1, azi1,
+                                                arcmode, s12_a12, caps) {
+    var t;
+    if (!caps) caps = g.STANDARD | g.DISTANCE_IN;
+    // Automatically supply DISTANCE_IN if necessary
+    if (!arcmode) caps |= g.DISTANCE_IN;
+    t = new l.GeodesicLine(this, lat1, lon1, azi1, caps);
+    t.GenSetDistance(arcmode, s12_a12);
+    return t;
+  };
+
+  /**
+   * @summary Define a {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} in terms of the inverse geodesic problem.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} lat2 the latitude of the second point in degrees.
+   * @param {number} lon2 the longitude of the second point in degrees.
+   * @param {bitmask} [caps = STANDARD | DISTANCE_IN] which capabilities to
+   *   include.
+   * @returns {object} the
+   *   {@link module:GeographicLib/GeodesicLine.GeodesicLine
+   *   GeodesicLine} object
+   * @description This function sets point 3 of the GeodesicLine to correspond
+   *   to point 2 of the inverse geodesic problem.  For details on the caps
+   *   parameter, see {@tutorial 2-interface}, "The outmask and caps
+   *   parameters".
+   */
+  g.Geodesic.prototype.InverseLine = function(lat1, lon1, lat2, lon2, caps) {
+    var r, t, azi1;
+    if (!caps) caps = g.STANDARD | g.DISTANCE_IN;
+    r = this.InverseInt(lat1, lon1, lat2, lon2, g.ARC);
+    azi1 = m.atan2d(r.salp1, r.calp1);
+    // Ensure that a12 can be converted to a distance
+    if (caps & (g.OUT_MASK & g.DISTANCE_IN)) caps |= g.DISTANCE;
+    t = new l.GeodesicLine(this, lat1, lon1, azi1, caps, r.salp1, r.calp1);
+    t.SetArc(r.vals.a12);
+    return t;
+  };
+
+  /**
+   * @summary Create a {@link module:GeographicLib/PolygonArea.PolygonArea
+   *   PolygonArea} object.
+   * @param {bool} [polyline = false] if true the new PolygonArea object
+   *   describes a polyline instead of a polygon.
+   * @returns {object} the
+   *   {@link module:GeographicLib/PolygonArea.PolygonArea
+   *   PolygonArea} object
+   */
+  g.Geodesic.prototype.Polygon = function(polyline) {
+    return new p.PolygonArea(this, polyline);
+  };
+
+  /**
+   * @summary a {@link module:GeographicLib/Geodesic.Geodesic Geodesic} object
+   *   initialized for the WGS84 ellipsoid.
+   * @constant {object}
+   */
+  g.WGS84 = new g.Geodesic(c.WGS84.a, c.WGS84.f);
+})(GeographicLib.Geodesic, GeographicLib.GeodesicLine,
+   GeographicLib.PolygonArea, GeographicLib.Math, GeographicLib.Constants);
+
+/**************** GeodesicLine.js ****************/
+/*
+ * GeodesicLine.js
+ * Transcription of GeodesicLine.[ch]pp into JavaScript.
+ *
+ * See the documentation for the C++ class.  The conversion is a literal
+ * conversion from C++.
+ *
+ * The algorithms are derived in
+ *
+ *    Charles F. F. Karney,
+ *    Algorithms for geodesics, J. Geodesy 87, 43-55 (2013);
+ *    https://doi.org/10.1007/s00190-012-0578-z
+ *    Addenda: https://geographiclib.sourceforge.io/geod-addenda.html
+ *
+ * Copyright (c) Charles Karney (2011-2016) <charles@karney.com> and licensed
+ * under the MIT/X11 License.  For more information, see
+ * https://geographiclib.sourceforge.io/
+ */
+
+// Load AFTER GeographicLib/Math.js, GeographicLib/Geodesic.js
+
+(function(
+  g,
+  /**
+   * @exports GeographicLib/GeodesicLine
+   * @description Solve geodesic problems on a single geodesic line via the
+   *   {@link module:GeographicLib/GeodesicLine.GeodesicLine GeodesicLine}
+   *   class.
+   */
+  l, m) {
+
+  /**
+   * @class
+   * @property {number} a the equatorial radius (meters).
+   * @property {number} f the flattening.
+   * @property {number} lat1 the initial latitude (degrees).
+   * @property {number} lon1 the initial longitude (degrees).
+   * @property {number} azi1 the initial azimuth (degrees).
+   * @property {number} salp1 the sine of the azimuth at the first point.
+   * @property {number} calp1 the cosine the azimuth at the first point.
+   * @property {number} s13 the distance to point 3 (meters).
+   * @property {number} a13 the arc length to point 3 (degrees).
+   * @property {bitmask} caps the capabilities of the object.
+   * @summary Initialize a GeodesicLine object.  For details on the caps
+   *   parameter, see {@tutorial 2-interface}, "The outmask and caps
+   *   parameters".
+   * @classdesc Performs geodesic calculations along a given geodesic line.
+   *   This object is usually instantiated by
+   *   {@link module:GeographicLib/Geodesic.Geodesic#Line Geodesic.Line}.
+   *   The methods
+   *   {@link module:GeographicLib/Geodesic.Geodesic#DirectLine
+   *   Geodesic.DirectLine} and
+   *   {@link module:GeographicLib/Geodesic.Geodesic#InverseLine
+   *   Geodesic.InverseLine} set in addition the position of a reference point
+   *   3.
+   * @param {object} geod a {@link module:GeographicLib/Geodesic.Geodesic
+   *   Geodesic} object.
+   * @param {number} lat1 the latitude of the first point in degrees.
+   * @param {number} lon1 the longitude of the first point in degrees.
+   * @param {number} azi1 the azimuth at the first point in degrees.
+   * @param {bitmask} [caps = STANDARD | DISTANCE_IN] which capabilities to
+   *   include; LATITUDE | AZIMUTH are always included.
+   */
+  l.GeodesicLine = function(geod, lat1, lon1, azi1, caps, salp1, calp1) {
+    var t, cbet1, sbet1, eps, s, c;
+    if (!caps) caps = g.STANDARD | g.DISTANCE_IN;
+
+    this.a = geod.a;
+    this.f = geod.f;
+    this._b = geod._b;
+    this._c2 = geod._c2;
+    this._f1 = geod._f1;
+    this.caps = caps | g.LATITUDE | g.AZIMUTH | g.LONG_UNROLL;
+
+    this.lat1 = m.LatFix(lat1);
+    this.lon1 = lon1;
+    if (typeof salp1 === 'undefined' || typeof calp1 === 'undefined') {
+      this.azi1 = m.AngNormalize(azi1);
+      t = m.sincosd(m.AngRound(this.azi1)); this.salp1 = t.s; this.calp1 = t.c;
+    } else {
+      this.azi1 = azi1; this.salp1 = salp1; this.calp1 = calp1;
+    }
+    t = m.sincosd(m.AngRound(this.lat1)); sbet1 = this._f1 * t.s; cbet1 = t.c;
+    // norm(sbet1, cbet1);
+    t = m.hypot(sbet1, cbet1); sbet1 /= t; cbet1 /= t;
+    // Ensure cbet1 = +epsilon at poles
+    cbet1 = Math.max(g.tiny_, cbet1);
+    this._dn1 = Math.sqrt(1 + geod._ep2 * m.sq(sbet1));
+
+    // Evaluate alp0 from sin(alp1) * cos(bet1) = sin(alp0),
+    this._salp0 = this.salp1 * cbet1; // alp0 in [0, pi/2 - |bet1|]
+    // Alt: calp0 = hypot(sbet1, calp1 * cbet1).  The following
+    // is slightly better (consider the case salp1 = 0).
+    this._calp0 = m.hypot(this.calp1, this.salp1 * sbet1);
+    // Evaluate sig with tan(bet1) = tan(sig1) * cos(alp1).
+    // sig = 0 is nearest northward crossing of equator.
+    // With bet1 = 0, alp1 = pi/2, we have sig1 = 0 (equatorial line).
+    // With bet1 =  pi/2, alp1 = -pi, sig1 =  pi/2
+    // With bet1 = -pi/2, alp1 =  0 , sig1 = -pi/2
+    // Evaluate omg1 with tan(omg1) = sin(alp0) * tan(sig1).
+    // With alp0 in (0, pi/2], quadrants for sig and omg coincide.
+    // No atan2(0,0) ambiguity at poles since cbet1 = +epsilon.
+    // With alp0 = 0, omg1 = 0 for alp1 = 0, omg1 = pi for alp1 = pi.
+    this._ssig1 = sbet1; this._somg1 = this._salp0 * sbet1;
+    this._csig1 = this._comg1 =
+      sbet1 !== 0 || this.calp1 !== 0 ? cbet1 * this.calp1 : 1;
+    // norm(this._ssig1, this._csig1); // sig1 in (-pi, pi]
+    t = m.hypot(this._ssig1, this._csig1);
+    this._ssig1 /= t; this._csig1 /= t;
+    // norm(this._somg1, this._comg1); -- don't need to normalize!
+
+    this._k2 = m.sq(this._calp0) * geod._ep2;
+    eps = this._k2 / (2 * (1 + Math.sqrt(1 + this._k2)) + this._k2);
+
+    if (this.caps & g.CAP_C1) {
+      this._A1m1 = g.A1m1f(eps);
+      this._C1a = new Array(g.nC1_ + 1);
+      g.C1f(eps, this._C1a);
+      this._B11 = g.SinCosSeries(true, this._ssig1, this._csig1, this._C1a);
+      s = Math.sin(this._B11); c = Math.cos(this._B11);
+      // tau1 = sig1 + B11
+      this._stau1 = this._ssig1 * c + this._csig1 * s;
+      this._ctau1 = this._csig1 * c - this._ssig1 * s;
+      // Not necessary because C1pa reverts C1a
+      //    _B11 = -SinCosSeries(true, _stau1, _ctau1, _C1pa);
+    }
+
+    if (this.caps & g.CAP_C1p) {
+      this._C1pa = new Array(g.nC1p_ + 1);
+      g.C1pf(eps, this._C1pa);
+    }
+
+    if (this.caps & g.CAP_C2) {
+      this._A2m1 = g.A2m1f(eps);
+      this._C2a = new Array(g.nC2_ + 1);
+      g.C2f(eps, this._C2a);
+      this._B21 = g.SinCosSeries(true, this._ssig1, this._csig1, this._C2a);
+    }
+
+    if (this.caps & g.CAP_C3) {
+      this._C3a = new Array(g.nC3_);
+      geod.C3f(eps, this._C3a);
+      this._A3c = -this.f * this._salp0 * geod.A3f(eps);
+      this._B31 = g.SinCosSeries(true, this._ssig1, this._csig1, this._C3a);
+    }
+
+    if (this.caps & g.CAP_C4) {
+      this._C4a = new Array(g.nC4_); // all the elements of _C4a are used
+      geod.C4f(eps, this._C4a);
+      // Multiplier = a^2 * e^2 * cos(alpha0) * sin(alpha0)
+      this._A4 = m.sq(this.a) * this._calp0 * this._salp0 * geod._e2;
+      this._B41 = g.SinCosSeries(false, this._ssig1, this._csig1, this._C4a);
+    }
+
+    this.a13 = this.s13 = Number.NaN;
+  };
+
+  /**
+   * @summary Find the position on the line (general case).
+   * @param {bool} arcmode is the next parameter an arc length?
+   * @param {number} s12_a12 the (arcmode ? arc length : distance) from the
+   *   first point to the second in (arcmode ? degrees : meters).
+   * @param {bitmask} [outmask = STANDARD] which results to include; this is
+   *   subject to the capabilities of the object.
+   * @returns {object} the requested results.
+   * @description The lat1, lon1, azi1, and a12 fields of the result are
+   *   always set; s12 is included if arcmode is false.  For details on the
+   *   outmask parameter, see {@tutorial 2-interface}, "The outmask and caps
+   *   parameters".
+   */
+  l.GeodesicLine.prototype.GenPosition = function(arcmode, s12_a12,
+                                                  outmask) {
+    var vals = {},
+        sig12, ssig12, csig12, B12, AB1, ssig2, csig2, tau12, s, c, serr,
+        omg12, lam12, lon12, E, sbet2, cbet2, somg2, comg2, salp2, calp2, dn2,
+        B22, AB2, J12, t, B42, salp12, calp12;
+    if (!outmask) outmask = g.STANDARD;
+    else if (outmask === g.LONG_UNROLL) outmask |= g.STANDARD;
+    outmask &= this.caps & g.OUT_MASK;
+    vals.lat1 = this.lat1; vals.azi1 = this.azi1;
+    vals.lon1 = outmask & g.LONG_UNROLL ?
+      this.lon1 : m.AngNormalize(this.lon1);
+    if (arcmode)
+      vals.a12 = s12_a12;
+    else
+      vals.s12 = s12_a12;
+    if (!( arcmode || (this.caps & g.DISTANCE_IN & g.OUT_MASK) )) {
+      // Uninitialized or impossible distance calculation requested
+      vals.a12 = Number.NaN;
+      return vals;
+    }
+
+    // Avoid warning about uninitialized B12.
+    B12 = 0; AB1 = 0;
+    if (arcmode) {
+      // Interpret s12_a12 as spherical arc length
+      sig12 = s12_a12 * m.degree;
+      t = m.sincosd(s12_a12); ssig12 = t.s; csig12 = t.c;
+    } else {
+      // Interpret s12_a12 as distance
+      tau12 = s12_a12 / (this._b * (1 + this._A1m1));
+      s = Math.sin(tau12);
+      c = Math.cos(tau12);
+      // tau2 = tau1 + tau12
+      B12 = -g.SinCosSeries(true,
+                            this._stau1 * c + this._ctau1 * s,
+                            this._ctau1 * c - this._stau1 * s,
+                            this._C1pa);
+      sig12 = tau12 - (B12 - this._B11);
+      ssig12 = Math.sin(sig12); csig12 = Math.cos(sig12);
+      if (Math.abs(this.f) > 0.01) {
+        // Reverted distance series is inaccurate for |f| > 1/100, so correct
+        // sig12 with 1 Newton iteration.  The following table shows the
+        // approximate maximum error for a = WGS_a() and various f relative to
+        // GeodesicExact.
+        //     erri = the error in the inverse solution (nm)
+        //     errd = the error in the direct solution (series only) (nm)
+        //     errda = the error in the direct solution
+        //             (series + 1 Newton) (nm)
+        //
+        //       f     erri  errd errda
+        //     -1/5    12e6 1.2e9  69e6
+        //     -1/10  123e3  12e6 765e3
+        //     -1/20   1110 108e3  7155
+        //     -1/50  18.63 200.9 27.12
+        //     -1/100 18.63 23.78 23.37
+        //     -1/150 18.63 21.05 20.26
+        //      1/150 22.35 24.73 25.83
+        //      1/100 22.35 25.03 25.31
+        //      1/50  29.80 231.9 30.44
+        //      1/20   5376 146e3  10e3
+        //      1/10  829e3  22e6 1.5e6
+        //      1/5   157e6 3.8e9 280e6
+        ssig2 = this._ssig1 * csig12 + this._csig1 * ssig12;
+        csig2 = this._csig1 * csig12 - this._ssig1 * ssig12;
+        B12 = g.SinCosSeries(true, ssig2, csig2, this._C1a);
+        serr = (1 + this._A1m1) * (sig12 + (B12 - this._B11)) -
+          s12_a12 / this._b;
+        sig12 = sig12 - serr / Math.sqrt(1 + this._k2 * m.sq(ssig2));
+        ssig12 = Math.sin(sig12); csig12 = Math.cos(sig12);
+        // Update B12 below
+      }
+    }
+
+    // sig2 = sig1 + sig12
+    ssig2 = this._ssig1 * csig12 + this._csig1 * ssig12;
+    csig2 = this._csig1 * csig12 - this._ssig1 * ssig12;
+    dn2 = Math.sqrt(1 + this._k2 * m.sq(ssig2));
+    if (outmask & (g.DISTANCE | g.REDUCEDLENGTH | g.GEODESICSCALE)) {
+      if (arcmode || Math.abs(this.f) > 0.01)
+        B12 = g.SinCosSeries(true, ssig2, csig2, this._C1a);
+      AB1 = (1 + this._A1m1) * (B12 - this._B11);
+    }
+    // sin(bet2) = cos(alp0) * sin(sig2)
+    sbet2 = this._calp0 * ssig2;
+    // Alt: cbet2 = hypot(csig2, salp0 * ssig2);
+    cbet2 = m.hypot(this._salp0, this._calp0 * csig2);
+    if (cbet2 === 0)
+      // I.e., salp0 = 0, csig2 = 0.  Break the degeneracy in this case
+      cbet2 = csig2 = g.tiny_;
+    // tan(alp0) = cos(sig2)*tan(alp2)
+    salp2 = this._salp0; calp2 = this._calp0 * csig2; // No need to normalize
+
+    if (arcmode && (outmask & g.DISTANCE))
+      vals.s12 = this._b * ((1 + this._A1m1) * sig12 + AB1);
+
+    if (outmask & g.LONGITUDE) {
+      // tan(omg2) = sin(alp0) * tan(sig2)
+      somg2 = this._salp0 * ssig2; comg2 = csig2; // No need to normalize
+      E = m.copysign(1, this._salp0);
+      // omg12 = omg2 - omg1
+      omg12 = outmask & g.LONG_UNROLL ?
+        E * (sig12 -
+             (Math.atan2(ssig2, csig2) -
+              Math.atan2(this._ssig1, this._csig1)) +
+             (Math.atan2(E * somg2, comg2) -
+              Math.atan2(E * this._somg1, this._comg1))) :
+        Math.atan2(somg2 * this._comg1 - comg2 * this._somg1,
+                     comg2 * this._comg1 + somg2 * this._somg1);
+      lam12 = omg12 + this._A3c *
+        ( sig12 + (g.SinCosSeries(true, ssig2, csig2, this._C3a) -
+                   this._B31));
+      lon12 = lam12 / m.degree;
+      vals.lon2 = outmask & g.LONG_UNROLL ? this.lon1 + lon12 :
+        m.AngNormalize(m.AngNormalize(this.lon1) + m.AngNormalize(lon12));
+    }
+
+    if (outmask & g.LATITUDE)
+      vals.lat2 = m.atan2d(sbet2, this._f1 * cbet2);
+
+    if (outmask & g.AZIMUTH)
+      vals.azi2 = m.atan2d(salp2, calp2);
+
+    if (outmask & (g.REDUCEDLENGTH | g.GEODESICSCALE)) {
+      B22 = g.SinCosSeries(true, ssig2, csig2, this._C2a);
+      AB2 = (1 + this._A2m1) * (B22 - this._B21);
+      J12 = (this._A1m1 - this._A2m1) * sig12 + (AB1 - AB2);
+      if (outmask & g.REDUCEDLENGTH)
+        // Add parens around (_csig1 * ssig2) and (_ssig1 * csig2) to ensure
+        // accurate cancellation in the case of coincident points.
+        vals.m12 = this._b * ((      dn2 * (this._csig1 * ssig2) -
+                               this._dn1 * (this._ssig1 * csig2)) -
+                              this._csig1 * csig2 * J12);
+      if (outmask & g.GEODESICSCALE) {
+        t = this._k2 * (ssig2 - this._ssig1) * (ssig2 + this._ssig1) /
+          (this._dn1 + dn2);
+        vals.M12 = csig12 +
+          (t * ssig2 - csig2 * J12) * this._ssig1 / this._dn1;
+        vals.M21 = csig12 -
+          (t * this._ssig1 - this._csig1 * J12) * ssig2 / dn2;
+      }
+    }
+
+    if (outmask & g.AREA) {
+      B42 = g.SinCosSeries(false, ssig2, csig2, this._C4a);
+      if (this._calp0 === 0 || this._salp0 === 0) {
+        // alp12 = alp2 - alp1, used in atan2 so no need to normalize
+        salp12 = salp2 * this.calp1 - calp2 * this.salp1;
+        calp12 = calp2 * this.calp1 + salp2 * this.salp1;
+      } else {
+        // tan(alp) = tan(alp0) * sec(sig)
+        // tan(alp2-alp1) = (tan(alp2) -tan(alp1)) / (tan(alp2)*tan(alp1)+1)
+        // = calp0 * salp0 * (csig1-csig2) / (salp0^2 + calp0^2 * csig1*csig2)
+        // If csig12 > 0, write
+        //   csig1 - csig2 = ssig12 * (csig1 * ssig12 / (1 + csig12) + ssig1)
+        // else
+        //   csig1 - csig2 = csig1 * (1 - csig12) + ssig12 * ssig1
+        // No need to normalize
+        salp12 = this._calp0 * this._salp0 *
+          (csig12 <= 0 ? this._csig1 * (1 - csig12) + ssig12 * this._ssig1 :
+           ssig12 * (this._csig1 * ssig12 / (1 + csig12) + this._ssig1));
+        calp12 = m.sq(this._salp0) + m.sq(this._calp0) * this._csig1 * csig2;
+      }
+      vals.S12 = this._c2 * Math.atan2(salp12, calp12) +
+        this._A4 * (B42 - this._B41);
+    }
+
+    if (!arcmode)
+      vals.a12 = sig12 / m.degree;
+    return vals;
+  };
+
+  /**
+   * @summary Find the position on the line given s12.
+   * @param {number} s12 the distance from the first point to the second in
+   *   meters.
+   * @param {bitmask} [outmask = STANDARD] which results to include; this is
+   *   subject to the capabilities of the object.
+   * @returns {object} the requested results.
+   * @description The lat1, lon1, azi1, s12, and a12 fields of the result are
+   *   always set; s12 is included if arcmode is false.  For details on the
+   *   outmask parameter, see {@tutorial 2-interface}, "The outmask and caps
+   *   parameters".
+   */
+  l.GeodesicLine.prototype.Position = function(s12, outmask) {
+    return this.GenPosition(false, s12, outmask);
+  };
+
+  /**
+   * @summary Find the position on the line given a12.
+   * @param {number} a12 the arc length from the first point to the second in
+   *   degrees.
+   * @param {bitmask} [outmask = STANDARD] which results to include; this is
+   *   subject to the capabilities of the object.
+   * @returns {object} the requested results.
+   * @description The lat1, lon1, azi1, and a12 fields of the result are
+   *   always set.  For details on the outmask parameter, see {@tutorial
+   *   2-interface}, "The outmask and caps parameters".
+   */
+  l.GeodesicLine.prototype.ArcPosition = function(a12, outmask) {
+    return this.GenPosition(true, a12, outmask);
+  };
+
+  /**
+   * @summary Specify position of point 3 in terms of either distance or arc
+   *   length.
+   * @param {bool} arcmode boolean flag determining the meaning of the second
+   *   parameter; if arcmode is false, then the GeodesicLine object must have
+   *   been constructed with caps |= DISTANCE_IN.
+   * @param {number} s13_a13 if arcmode is false, this is the distance from
+   *   point 1 to point 3 (meters); otherwise it is the arc length from
+   *   point 1 to point 3 (degrees); it can be negative.
+   **********************************************************************/
+  l.GeodesicLine.prototype.GenSetDistance = function(arcmode, s13_a13) {
+    if (arcmode)
+      this.SetArc(s13_a13);
+    else
+      this.SetDistance(s13_a13);
+  };
+
+  /**
+   * @summary Specify position of point 3 in terms distance.
+   * @param {number} s13 the distance from point 1 to point 3 (meters); it
+   *   can be negative.
+   **********************************************************************/
+  l.GeodesicLine.prototype.SetDistance = function(s13) {
+    var r;
+    this.s13 = s13;
+    r = this.GenPosition(false, this.s13, g.ARC);
+    this.a13 = 0 + r.a12;       // the 0+ converts undefined into NaN
+  };
+
+  /**
+   * @summary Specify position of point 3 in terms of arc length.
+   * @param {number} a13 the arc length from point 1 to point 3 (degrees);
+   *   it can be negative.
+   **********************************************************************/
+  l.GeodesicLine.prototype.SetArc = function(a13) {
+    var r;
+    this.a13 = a13;
+    r = this.GenPosition(true, this.a13, g.DISTANCE);
+    this.s13 = 0 + r.s12;       // the 0+ converts undefined into NaN
+  };
+
+})(GeographicLib.Geodesic, GeographicLib.GeodesicLine, GeographicLib.Math);
+
+/**************** PolygonArea.js ****************/
+/*
+ * PolygonArea.js
+ * Transcription of PolygonArea.[ch]pp into JavaScript.
+ *
+ * See the documentation for the C++ class.  The conversion is a literal
+ * conversion from C++.
+ *
+ * The algorithms are derived in
+ *
+ *    Charles F. F. Karney,
+ *    Algorithms for geodesics, J. Geodesy 87, 43-55 (2013);
+ *    https://doi.org/10.1007/s00190-012-0578-z
+ *    Addenda: https://geographiclib.sourceforge.io/geod-addenda.html
+ *
+ * Copyright (c) Charles Karney (2011-2017) <charles@karney.com> and licensed
+ * under the MIT/X11 License.  For more information, see
+ * https://geographiclib.sourceforge.io/
+ */
+
+// Load AFTER GeographicLib/Math.js and GeographicLib/Geodesic.js
+
+(function(
+  /**
+   * @exports GeographicLib/PolygonArea
+   * @description Compute the area of geodesic polygons via the
+   *   {@link module:GeographicLib/PolygonArea.PolygonArea PolygonArea}
+   *   class.
+   */
+  p, g, m, a) {
+
+  var transit, transitdirect;
+  transit = function(lon1, lon2) {
+    // Return 1 or -1 if crossing prime meridian in east or west direction.
+    // Otherwise return zero.
+    var lon12, cross;
+    // Compute lon12 the same way as Geodesic::Inverse.
+    lon1 = m.AngNormalize(lon1);
+    lon2 = m.AngNormalize(lon2);
+    lon12 = m.AngDiff(lon1, lon2).s;
+    cross = lon1 <= 0 && lon2 > 0 && lon12 > 0 ? 1 :
+      (lon2 <= 0 && lon1 > 0 && lon12 < 0 ? -1 : 0);
+    return cross;
+  };
+
+  // an alternate version of transit to deal with longitudes in the direct
+  // problem.
+  transitdirect = function(lon1, lon2) {
+    // We want to compute exactly
+    //   int(floor(lon2 / 360)) - int(floor(lon1 / 360))
+    // Since we only need the parity of the result we can use std::remquo but
+    // this is buggy with g++ 4.8.3 and requires C++11.  So instead we do
+    lon1 = lon1 % 720.0; lon2 = lon2 % 720.0;
+    return ( ((lon2 >= 0 && lon2 < 360) || lon2 < -360 ? 0 : 1) -
+             ((lon1 >= 0 && lon1 < 360) || lon1 < -360 ? 0 : 1) );
+  };
+
+  /**
+   * @class
+   * @property {number} a the equatorial radius (meters).
+   * @property {number} f the flattening.
+   * @property {bool} polyline whether the PolygonArea object describes a
+   *   polyline or a polygon.
+   * @property {number} num the number of vertices so far.
+   * @property {number} lat the current latitude (degrees).
+   * @property {number} lon the current longitude (degrees).
+   * @summary Initialize a PolygonArea object.
+   * @classdesc Computes the area and perimeter of a geodesic polygon.
+   *   This object is usually instantiated by
+   *   {@link module:GeographicLib/Geodesic.Geodesic#Polygon Geodesic.Polygon}.
+   * @param {object} geod a {@link module:GeographicLib/Geodesic.Geodesic
+   *   Geodesic} object.
+   * @param {bool} [polyline = false] if true the new PolygonArea object
+   *   describes a polyline instead of a polygon.
+   */
+  p.PolygonArea = function(geod, polyline) {
+    this._geod = geod;
+    this.a = this._geod.a;
+    this.f = this._geod.f;
+    this._area0 = 4 * Math.PI * geod._c2;
+    this.polyline = !polyline ? false : polyline;
+    this._mask = g.LATITUDE | g.LONGITUDE | g.DISTANCE |
+          (this.polyline ? g.NONE : g.AREA | g.LONG_UNROLL);
+    if (!this.polyline)
+      this._areasum = new a.Accumulator(0);
+    this._perimetersum = new a.Accumulator(0);
+    this.Clear();
+  };
+
+  /**
+   * @summary Clear the PolygonArea object, setting the number of vertices to
+   *   0.
+   */
+  p.PolygonArea.prototype.Clear = function() {
+    this.num = 0;
+    this._crossings = 0;
+    if (!this.polyline)
+      this._areasum.Set(0);
+    this._perimetersum.Set(0);
+    this._lat0 = this._lon0 = this.lat = this.lon = Number.NaN;
+  };
+
+  /**
+   * @summary Add the next vertex to the polygon.
+   * @param {number} lat the latitude of the point (degrees).
+   * @param {number} lon the longitude of the point (degrees).
+   * @description This adds an edge from the current vertex to the new vertex.
+   */
+  p.PolygonArea.prototype.AddPoint = function(lat, lon) {
+    var t;
+    if (this.num === 0) {
+      this._lat0 = this.lat = lat;
+      this._lon0 = this.lon = lon;
+    } else {
+      t = this._geod.Inverse(this.lat, this.lon, lat, lon, this._mask);
+      this._perimetersum.Add(t.s12);
+      if (!this.polyline) {
+        this._areasum.Add(t.S12);
+        this._crossings += transit(this.lon, lon);
+      }
+      this.lat = lat;
+      this.lon = lon;
+    }
+    ++this.num;
+  };
+
+  /**
+   * @summary Add the next edge to the polygon.
+   * @param {number} azi the azimuth at the current the point (degrees).
+   * @param {number} s the length of the edge (meters).
+   * @description This specifies the new vertex in terms of the edge from the
+   *   current vertex.
+   */
+  p.PolygonArea.prototype.AddEdge = function(azi, s) {
+    var t;
+    if (this.num) {
+      t = this._geod.Direct(this.lat, this.lon, azi, s, this._mask);
+      this._perimetersum.Add(s);
+      if (!this.polyline) {
+        this._areasum.Add(t.S12);
+        this._crossings += transitdirect(this.lon, t.lon2);
+      }
+      this.lat = t.lat2;
+      this.lon = t.lon2;
+    }
+    ++this.num;
+  };
+
+  /**
+   * @summary Compute the perimeter and area of the polygon.
+   * @param {bool} reverse if true then clockwise (instead of
+   *   counter-clockwise) traversal counts as a positive area.
+   * @param {bool} sign if true then return a signed result for the area if the
+   *   polygon is traversed in the "wrong" direction instead of returning the
+   *   area for the rest of the earth.
+   * @returns {object} r where r.number is the number of vertices, r.perimeter
+   *   is the perimeter (meters), and r.area (only returned if polyline is
+   *   false) is the area (meters<sup>2</sup>).
+   * @description If the object is a polygon (and not a polygon), the perimeter
+   *   includes the length of a final edge connecting the current point to the
+   *   initial point.  If the object is a polyline, then area is nan.  More
+   *   points can be added to the polygon after this call.
+   */
+  p.PolygonArea.prototype.Compute = function(reverse, sign) {
+    var vals = {number: this.num}, t, tempsum, crossings;
+    if (this.num < 2) {
+      vals.perimeter = 0;
+      if (!this.polyline)
+        vals.area = 0;
+      return vals;
+    }
+    if (this.polyline) {
+      vals.perimeter = this._perimetersum.Sum();
+      return vals;
+    }
+    t = this._geod.Inverse(this.lat, this.lon, this._lat0, this._lon0,
+                           this._mask);
+    vals.perimeter = this._perimetersum.Sum(t.s12);
+    tempsum = new a.Accumulator(this._areasum);
+    tempsum.Add(t.S12);
+    crossings = this._crossings + transit(this.lon, this._lon0);
+    if (crossings & 1)
+      tempsum.Add( (tempsum.Sum() < 0 ? 1 : -1) * this._area0/2 );
+    // area is with the clockwise sense.  If !reverse convert to
+    // counter-clockwise convention.
+    if (!reverse)
+      tempsum.Negate();
+    // If sign put area in (-area0/2, area0/2], else put area in [0, area0)
+    if (sign) {
+      if (tempsum.Sum() > this._area0/2)
+        tempsum.Add( -this._area0 );
+      else if (tempsum.Sum() <= -this._area0/2)
+        tempsum.Add( +this._area0 );
+    } else {
+      if (tempsum.Sum() >= this._area0)
+        tempsum.Add( -this._area0 );
+      else if (tempsum < 0)
+        tempsum.Add( -this._area0 );
+    }
+    vals.area = tempsum.Sum();
+    return vals;
+  };
+
+  /**
+   * @summary Compute the perimeter and area of the polygon with a tentative
+   *   new vertex.
+   * @param {number} lat the latitude of the point (degrees).
+   * @param {number} lon the longitude of the point (degrees).
+   * @param {bool} reverse if true then clockwise (instead of
+   *   counter-clockwise) traversal counts as a positive area.
+   * @param {bool} sign if true then return a signed result for the area if the
+   *   polygon is traversed in the "wrong" direction instead of returning the
+   * @returns {object} r where r.number is the number of vertices, r.perimeter
+   *   is the perimeter (meters), and r.area (only returned if polyline is
+   *   false) is the area (meters<sup>2</sup>).
+   * @description A new vertex is *not* added to the polygon.
+   */
+  p.PolygonArea.prototype.TestPoint = function(lat, lon, reverse, sign) {
+    var vals = {number: this.num + 1}, t, tempsum, crossings, i;
+    if (this.num === 0) {
+      vals.perimeter = 0;
+      if (!this.polyline)
+        vals.area = 0;
+      return vals;
+    }
+    vals.perimeter = this._perimetersum.Sum();
+    tempsum = this.polyline ? 0 : this._areasum.Sum();
+    crossings = this._crossings;
+    for (i = 0; i < (this.polyline ? 1 : 2); ++i) {
+      t = this._geod.Inverse(
+       i === 0 ? this.lat : lat, i === 0 ? this.lon : lon,
+       i !== 0 ? this._lat0 : lat, i !== 0 ? this._lon0 : lon,
+       this._mask);
+      vals.perimeter += t.s12;
+      if (!this.polyline) {
+        tempsum += t.S12;
+        crossings += transit(i === 0 ? this.lon : lon,
+                               i !== 0 ? this._lon0 : lon);
+      }
+    }
+
+    if (this.polyline)
+      return vals;
+
+    if (crossings & 1)
+      tempsum += (tempsum < 0 ? 1 : -1) * this._area0/2;
+    // area is with the clockwise sense.  If !reverse convert to
+    // counter-clockwise convention.
+    if (!reverse)
+      tempsum *= -1;
+    // If sign put area in (-area0/2, area0/2], else put area in [0, area0)
+    if (sign) {
+      if (tempsum > this._area0/2)
+        tempsum -= this._area0;
+      else if (tempsum <= -this._area0/2)
+        tempsum += this._area0;
+    } else {
+      if (tempsum >= this._area0)
+        tempsum -= this._area0;
+      else if (tempsum < 0)
+        tempsum += this._area0;
+    }
+    vals.area = tempsum;
+    return vals;
+  };
+
+  /**
+   * @summary Compute the perimeter and area of the polygon with a tentative
+   *   new edge.
+   * @param {number} azi the azimuth of the edge (degrees).
+   * @param {number} s the length of the edge (meters).
+   * @param {bool} reverse if true then clockwise (instead of
+   *   counter-clockwise) traversal counts as a positive area.
+   * @param {bool} sign if true then return a signed result for the area if the
+   *   polygon is traversed in the "wrong" direction instead of returning the
+   * @returns {object} r where r.number is the number of vertices, r.perimeter
+   *   is the perimeter (meters), and r.area (only returned if polyline is
+   *   false) is the area (meters<sup>2</sup>).
+   * @description A new vertex is *not* added to the polygon.
+   */
+  p.PolygonArea.prototype.TestEdge = function(azi, s, reverse, sign) {
+    var vals = {number: this.num ? this.num + 1 : 0}, t, tempsum, crossings;
+    if (this.num === 0)
+      return vals;
+    vals.perimeter = this._perimetersum.Sum() + s;
+    if (this.polyline)
+      return vals;
+
+    tempsum = this._areasum.Sum();
+    crossings = this._crossings;
+    t = this._geod.Direct(this.lat, this.lon, azi, s, this._mask);
+    tempsum += t.S12;
+    crossings += transitdirect(this.lon, t.lon2);
+    t = this._geod.Inverse(t.lat2, t.lon2, this._lat0, this._lon0, this._mask);
+    vals.perimeter += t.s12;
+    tempsum += t.S12;
+    crossings += transit(t.lon2, this._lon0);
+
+    if (crossings & 1)
+      tempsum += (tempsum < 0 ? 1 : -1) * this._area0/2;
+    // area is with the clockwise sense.  If !reverse convert to
+    // counter-clockwise convention.
+    if (!reverse)
+      tempsum *= -1;
+    // If sign put area in (-area0/2, area0/2], else put area in [0, area0)
+    if (sign) {
+      if (tempsum > this._area0/2)
+        tempsum -= this._area0;
+      else if (tempsum <= -this._area0/2)
+        tempsum += this._area0;
+    } else {
+      if (tempsum >= this._area0)
+        tempsum -= this._area0;
+      else if (tempsum < 0)
+        tempsum += this._area0;
+    }
+    vals.area = tempsum;
+    return vals;
+  };
+
+})(GeographicLib.PolygonArea, GeographicLib.Geodesic,
+   GeographicLib.Math, GeographicLib.Accumulator);
+
+/**************** DMS.js ****************/
+/*
+ * DMS.js
+ * Transcription of DMS.[ch]pp into JavaScript.
+ *
+ * See the documentation for the C++ class.  The conversion is a literal
+ * conversion from C++.
+ *
+ * Copyright (c) Charles Karney (2011-2017) <charles@karney.com> and licensed
+ * under the MIT/X11 License.  For more information, see
+ * https://geographiclib.sourceforge.io/
+ */
+
+GeographicLib.DMS = {};
+
+(function(
+  /**
+   * @exports GeographicLib/DMS
+   * @description Decode/Encode angles expressed as degrees, minutes, and
+   *   seconds.  This module defines several constants:
+   *   - hemisphere indicator (returned by
+   *       {@link module:GeographicLib/DMS.Decode Decode}) and a formatting
+   *       indicator (used by
+   *       {@link module:GeographicLib/DMS.Encode Encode})
+   *     - NONE = 0, no designator and format as plain angle;
+   *     - LATITUDE = 1, a N/S designator and format as latitude;
+   *     - LONGITUDE = 2, an E/W designator and format as longitude;
+   *     - AZIMUTH = 3, format as azimuth;
+   *   - the specification of the trailing component in
+   *       {@link module:GeographicLib/DMS.Encode Encode}
+   *     - DEGREE;
+   *     - MINUTE;
+   *     - SECOND.
+   */
+  d) {
+
+  var lookup, zerofill, internalDecode, numMatch,
+      hemispheres_ = "SNWE",
+      signs_ = "-+",
+      digits_ = "0123456789",
+      dmsindicators_ = "D'\":",
+      // dmsindicatorsu_ = "\u00b0\u2032\u2033"; // Unicode variants
+      dmsindicatorsu_ = "\u00b0'\"", // Use degree symbol
+      components_ = ["degrees", "minutes", "seconds"];
+  lookup = function(s, c) {
+    return s.indexOf(c.toUpperCase());
+  };
+  zerofill = function(s, n) {
+    return String("0000").substr(0, Math.max(0, Math.min(4, n-s.length))) +
+      s;
+  };
+  d.NONE = 0;
+  d.LATITUDE = 1;
+  d.LONGITUDE = 2;
+  d.AZIMUTH = 3;
+  d.DEGREE = 0;
+  d.MINUTE = 1;
+  d.SECOND = 2;
+
+  /**
+   * @summary Decode a DMS string.
+   * @description The interpretation of the string is given in the
+   *   documentation of the corresponding function, Decode(string&, flag&)
+   *   in the {@link
+   *   https://geographiclib.sourceforge.io/html/classGeographicLib_1_1DMS.html
+   *   C++ DMS class}
+   * @param {string} dms the string.
+   * @returns {object} r where r.val is the decoded value (degrees) and r.ind
+   *   is a hemisphere designator, one of NONE, LATITUDE, LONGITUDE.
+   * @throws an error if the string is illegal.
+   */
+  d.Decode = function(dms) {
+    var dmsa = dms, end,
+        v = 0, i = 0, mi, pi, vals,
+        ind1 = d.NONE, ind2, p, pa, pb;
+    dmsa = dmsa.replace(/\u00b0/g, 'd')
+          .replace(/\u00ba/g, 'd')
+          .replace(/\u2070/g, 'd')
+          .replace(/\u02da/g, 'd')
+          .replace(/\u2032/g, '\'')
+          .replace(/\u00b4/g, '\'')
+          .replace(/\u2019/g, '\'')
+          .replace(/\u2033/g, '"')
+          .replace(/\u201d/g, '"')
+          .replace(/\u2212/g, '-')
+          .replace(/''/g, '"')
+          .trim();
+    end = dmsa.length;
+    // p is pointer to the next piece that needs decoding
+    for (p = 0; p < end; p = pb, ++i) {
+      pa = p;
+      // Skip over initial hemisphere letter (for i == 0)
+      if (i === 0 && lookup(hemispheres_, dmsa.charAt(pa)) >= 0)
+        ++pa;
+      // Skip over initial sign (checking for it if i == 0)
+      if (i > 0 || (pa < end && lookup(signs_, dmsa.charAt(pa)) >= 0))
+        ++pa;
+      // Find next sign
+      mi = dmsa.substr(pa, end - pa).indexOf('-');
+      pi = dmsa.substr(pa, end - pa).indexOf('+');
+      if (mi < 0) mi = end; else mi += pa;
+      if (pi < 0) pi = end; else pi += pa;
+      pb = Math.min(mi, pi);
+      vals = internalDecode(dmsa.substr(p, pb - p));
+      v += vals.val; ind2 = vals.ind;
+      if (ind1 === d.NONE)
+        ind1 = ind2;
+      else if (!(ind2 === d.NONE || ind1 === ind2))
+        throw new Error("Incompatible hemisphere specifies in " +
+                        dmsa.substr(0, pb));
+    }
+    if (i === 0)
+      throw new Error("Empty or incomplete DMS string " + dmsa);
+    return {val: v, ind: ind1};
+  };
+
+  internalDecode = function(dmsa) {
+    var vals = {}, errormsg = "",
+        sign, beg, end, ind1, k,
+        ipieces, fpieces, npiece,
+        icurrent, fcurrent, ncurrent, p,
+        pointseen,
+        digcount, intcount,
+        x;
+    do {                       // Executed once (provides the ability to break)
+      sign = 1;
+      beg = 0; end = dmsa.length;
+      ind1 = d.NONE;
+      k = -1;
+      if (end > beg && (k = lookup(hemispheres_, dmsa.charAt(beg))) >= 0) {
+        ind1 = (k & 2) ? d.LONGITUDE : d.LATITUDE;
+        sign = (k & 1) ? 1 : -1;
+        ++beg;
+      }
+      if (end > beg &&
+          (k = lookup(hemispheres_, dmsa.charAt(end-1))) >= 0) {
+        if (k >= 0) {
+          if (ind1 !== d.NONE) {
+            if (dmsa.charAt(beg - 1).toUpperCase() ===
+                dmsa.charAt(end - 1).toUpperCase())
+              errormsg = "Repeated hemisphere indicators " +
+              dmsa.charAt(beg - 1) + " in " +
+              dmsa.substr(beg - 1, end - beg + 1);
+            else
+              errormsg = "Contradictory hemisphere indicators " +
+              dmsa.charAt(beg - 1) + " and " + dmsa.charAt(end - 1) + " in " +
+              dmsa.substr(beg - 1, end - beg + 1);
+            break;
+          }
+          ind1 = (k & 2) ? d.LONGITUDE : d.LATITUDE;
+          sign = (k & 1) ? 1 : -1;
+          --end;
+        }
+      }
+      if (end > beg && (k = lookup(signs_, dmsa.charAt(beg))) >= 0) {
+        if (k >= 0) {
+          sign *= k ? 1 : -1;
+          ++beg;
+        }
+      }
+      if (end === beg) {
+        errormsg = "Empty or incomplete DMS string " + dmsa;
+        break;
+      }
+      ipieces = [0, 0, 0];
+      fpieces = [0, 0, 0];
+      npiece = 0;
+      icurrent = 0;
+      fcurrent = 0;
+      ncurrent = 0;
+      p = beg;
+      pointseen = false;
+      digcount = 0;
+      intcount = 0;
+      while (p < end) {
+        x = dmsa.charAt(p++);
+        if ((k = lookup(digits_, x)) >= 0) {
+          ++ncurrent;
+          if (digcount > 0) {
+            ++digcount;         // Count of decimal digits
+          } else {
+            icurrent = 10 * icurrent + k;
+            ++intcount;
+          }
+        } else if (x === '.') {
+          if (pointseen) {
+            errormsg = "Multiple decimal points in " +
+              dmsa.substr(beg, end - beg);
+            break;
+          }
+          pointseen = true;
+          digcount = 1;
+        } else if ((k = lookup(dmsindicators_, x)) >= 0) {
+          if (k >= 3) {
+            if (p === end) {
+              errormsg = "Illegal for colon to appear at the end of " +
+                dmsa.substr(beg, end - beg);
+              break;
+            }
+            k = npiece;
+          }
+          if (k === npiece - 1) {
+            errormsg = "Repeated " + components_[k] +
+              " component in " + dmsa.substr(beg, end - beg);
+            break;
+          } else if (k < npiece) {
+            errormsg = components_[k] + " component follows " +
+              components_[npiece - 1] + " component in " +
+              dmsa.substr(beg, end - beg);
+            break;
+          }
+          if (ncurrent === 0) {
+            errormsg = "Missing numbers in " + components_[k] +
+              " component of " + dmsa.substr(beg, end - beg);
+            break;
+          }
+          if (digcount > 0) {
+            fcurrent = parseFloat(dmsa.substr(p - intcount - digcount - 1,
+                                              intcount + digcount));
+            icurrent = 0;
+          }
+          ipieces[k] = icurrent;
+          fpieces[k] = icurrent + fcurrent;
+          if (p < end) {
+            npiece = k + 1;
+            icurrent = fcurrent = 0;
+            ncurrent = digcount = intcount = 0;
+          }
+        } else if (lookup(signs_, x) >= 0) {
+          errormsg = "Internal sign in DMS string " +
+            dmsa.substr(beg, end - beg);
+          break;
+        } else {
+          errormsg = "Illegal character " + x + " in DMS string " +
+            dmsa.substr(beg, end - beg);
+          break;
+        }
+      }
+      if (errormsg.length)
+        break;
+      if (lookup(dmsindicators_, dmsa.charAt(p - 1)) < 0) {
+        if (npiece >= 3) {
+          errormsg = "Extra text following seconds in DMS string " +
+            dmsa.substr(beg, end - beg);
+          break;
+        }
+        if (ncurrent === 0) {
+          errormsg = "Missing numbers in trailing component of " +
+            dmsa.substr(beg, end - beg);
+          break;
+        }
+        if (digcount > 0) {
+          fcurrent = parseFloat(dmsa.substr(p - intcount - digcount,
+                                            intcount + digcount));
+          icurrent = 0;
+        }
+        ipieces[npiece] = icurrent;
+        fpieces[npiece] = icurrent + fcurrent;
+      }
+      if (pointseen && digcount === 0) {
+        errormsg = "Decimal point in non-terminal component of " +
+          dmsa.substr(beg, end - beg);
+        break;
+      }
+      // Note that we accept 59.999999... even though it rounds to 60.
+      if (ipieces[1] >= 60 || fpieces[1] > 60) {
+        errormsg = "Minutes " + fpieces[1] + " not in range [0,60)";
+        break;
+      }
+      if (ipieces[2] >= 60 || fpieces[2] > 60) {
+        errormsg = "Seconds " + fpieces[2] + " not in range [0,60)";
+        break;
+      }
+      vals.ind = ind1;
+      // Assume check on range of result is made by calling routine (which
+      // might be able to offer a better diagnostic).
+      vals.val = sign *
+        ( fpieces[2] ? (60*(60*fpieces[0] + fpieces[1]) + fpieces[2]) / 3600 :
+          ( fpieces[1] ? (60*fpieces[0] + fpieces[1]) / 60 : fpieces[0] ) );
+      return vals;
+    } while (false);
+    vals.val = numMatch(dmsa);
+    if (vals.val === 0)
+      throw new Error(errormsg);
+    else
+      vals.ind = d.NONE;
+    return vals;
+  };
+
+  numMatch = function(s) {
+    var t, sign, p0, p1;
+    if (s.length < 3)
+      return 0;
+    t = s.toUpperCase().replace(/0+$/, "");
+    sign = t.charAt(0) === '-' ? -1 : 1;
+    p0 = t.charAt(0) === '-' || t.charAt(0) === '+' ? 1 : 0;
+    p1 = t.length - 1;
+    if (p1 + 1 < p0 + 3)
+      return 0;
+    // Strip off sign and trailing 0s
+    t = t.substr(p0, p1 + 1 - p0); // Length at least 3
+    if (t === "NAN" || t === "1.#QNAN" || t === "1.#SNAN" || t === "1.#IND" ||
+        t === "1.#R")
+      return Number.NaN;
+    else if (t === "INF" || t === "1.#INF")
+      return sign * Number.POSITIVE_INFINITY;
+    return 0;
+  };
+
+  /**
+   * @summary Decode two DMS strings interpreting them as a latitude/longitude
+   *   pair.
+   * @param {string} stra the first string.
+   * @param {string} strb the first string.
+   * @param {bool} [longfirst = false] if true assume then longitude is given
+   *   first (in the absense of any hemisphere indicators).
+   * @returns {object} r where r.lat is the decoded latitude and r.lon is the
+   *   decoded longitude (both in degrees).
+   * @throws an error if the strings are illegal.
+   */
+  d.DecodeLatLon = function(stra, strb, longfirst) {
+    var vals = {},
+        valsa = d.Decode(stra),
+        valsb = d.Decode(strb),
+        a = valsa.val, ia = valsa.ind,
+        b = valsb.val, ib = valsb.ind,
+        lat, lon;
+    if (!longfirst) longfirst = false;
+    if (ia === d.NONE && ib === d.NONE) {
+      // Default to lat, long unless longfirst
+      ia = longfirst ? d.LONGITUDE : d.LATITUDE;
+      ib = longfirst ? d.LATITUDE : d.LONGITUDE;
+    } else if (ia === d.NONE)
+      ia = d.LATITUDE + d.LONGITUDE - ib;
+    else if (ib === d.NONE)
+      ib = d.LATITUDE + d.LONGITUDE - ia;
+    if (ia === ib)
+      throw new Error("Both " + stra + " and " + strb + " interpreted as " +
+                      (ia === d.LATITUDE ? "latitudes" : "longitudes"));
+    lat = ia === d.LATITUDE ? a : b;
+    lon = ia === d.LATITUDE ? b : a;
+    if (Math.abs(lat) > 90)
+      throw new Error("Latitude " + lat + " not in [-90,90]");
+    vals.lat = lat;
+    vals.lon = lon;
+    return vals;
+  };
+
+  /**
+   * @summary Decode a DMS string interpreting it as an arc length.
+   * @param {string} angstr the string (this must not include a hemisphere
+   *   indicator).
+   * @returns {number} the arc length (degrees).
+   * @throws an error if the string is illegal.
+   */
+  d.DecodeAngle = function(angstr) {
+    var vals = d.Decode(angstr),
+        ang = vals.val, ind = vals.ind;
+    if (ind !== d.NONE)
+      throw new Error("Arc angle " + angstr +
+                      " includes a hemisphere N/E/W/S");
+    return ang;
+  };
+
+  /**
+   * @summary Decode a DMS string interpreting it as an azimuth.
+   * @param {string} azistr the string (this may include an E/W hemisphere
+   *   indicator).
+   * @returns {number} the azimuth (degrees).
+   * @throws an error if the string is illegal.
+   */
+  d.DecodeAzimuth = function(azistr) {
+    var vals = d.Decode(azistr),
+        azi = vals.val, ind = vals.ind;
+    if (ind === d.LATITUDE)
+      throw new Error("Azimuth " + azistr + " has a latitude hemisphere N/S");
+    return azi;
+  };
+
+  /**
+   * @summary Convert angle (in degrees) into a DMS string (using &deg;, ',
+   *  and &quot;).
+   * @param {number} angle input angle (degrees).
+   * @param {number} trailing one of DEGREE, MINUTE, or SECOND to indicate
+   *   the trailing component of the string (this component is given as a
+   *   decimal number if necessary).
+   * @param {number} prec the number of digits after the decimal point for
+   *   the trailing component.
+   * @param {number} [ind = NONE] a formatting indicator, one of NONE,
+   *   LATITUDE, LONGITUDE, AZIMUTH.
+   * @returns {string} the resulting string formatted as follows:
+   *   * NONE, signed result no leading zeros on degrees except in the units
+   *     place, e.g., -8&deg;03'.
+   *   * LATITUDE, trailing N or S hemisphere designator, no sign, pad
+   *     degrees to 2 digits, e.g., 08&deg;03'S.
+   *   * LONGITUDE, trailing E or W hemisphere designator, no sign, pad
+   *     degrees to 3 digits, e.g., 008&deg;03'W.
+   *   * AZIMUTH, convert to the range [0, 360&deg;), no sign, pad degrees to
+   *     3 digits, e.g., 351&deg;57'.
+   */
+  d.Encode = function(angle, trailing, prec, ind) {
+    // Assume check on range of input angle has been made by calling
+    // routine (which might be able to offer a better diagnostic).
+    var scale = 1, i, sign,
+        idegree, fdegree, f, pieces, ip, fp, s;
+    if (!ind) ind = d.NONE;
+    if (!isFinite(angle))
+      return angle < 0 ? String("-inf") :
+      (angle > 0 ? String("inf") : String("nan"));
+
+    // 15 - 2 * trailing = ceiling(log10(2^53/90/60^trailing)).
+    // This suffices to give full real precision for numbers in [-90,90]
+    prec = Math.min(15 - 2 * trailing, prec);
+    for (i = 0; i < trailing; ++i)
+      scale *= 60;
+    for (i = 0; i < prec; ++i)
+      scale *= 10;
+    if (ind === d.AZIMUTH)
+      angle -= Math.floor(angle/360) * 360;
+    sign = angle < 0 ? -1 : 1;
+    angle *= sign;
+
+    // Break off integer part to preserve precision in manipulation of
+    // fractional part.
+    idegree = Math.floor(angle);
+    fdegree = (angle - idegree) * scale + 0.5;
+    f = Math.floor(fdegree);
+    // Implement the "round ties to even" rule
+    fdegree = (f === fdegree && (f & 1) === 1) ? f - 1 : f;
+    fdegree /= scale;
+
+    fdegree = Math.floor((angle - idegree) * scale + 0.5) / scale;
+    if (fdegree >= 1) {
+      idegree += 1;
+      fdegree -= 1;
+    }
+    pieces = [fdegree, 0, 0];
+    for (i = 1; i <= trailing; ++i) {
+      ip = Math.floor(pieces[i - 1]);
+      fp = pieces[i - 1] - ip;
+      pieces[i] = fp * 60;
+      pieces[i - 1] = ip;
+    }
+    pieces[0] += idegree;
+    s = "";
+    if (ind === d.NONE && sign < 0)
+      s += '-';
+    switch (trailing) {
+    case d.DEGREE:
+      s += zerofill(pieces[0].toFixed(prec),
+                    ind === d.NONE ? 0 :
+                    1 + Math.min(ind, 2) + prec + (prec ? 1 : 0)) +
+        dmsindicatorsu_.charAt(0);
+      break;
+    default:
+      s += zerofill(pieces[0].toFixed(0),
+                    ind === d.NONE ? 0 : 1 + Math.min(ind, 2)) +
+        dmsindicatorsu_.charAt(0);
+      switch (trailing) {
+      case d.MINUTE:
+        s += zerofill(pieces[1].toFixed(prec), 2 + prec + (prec ? 1 : 0)) +
+          dmsindicatorsu_.charAt(1);
+        break;
+      case d.SECOND:
+        s += zerofill(pieces[1].toFixed(0), 2) + dmsindicatorsu_.charAt(1);
+        s += zerofill(pieces[2].toFixed(prec), 2 + prec + (prec ? 1 : 0)) +
+          dmsindicatorsu_.charAt(2);
+        break;
+      default:
+        break;
+      }
+    }
+    if (ind !== d.NONE && ind !== d.AZIMUTH)
+      s += hemispheres_.charAt((ind === d.LATITUDE ? 0 : 2) +
+                               (sign < 0 ? 0 : 1));
+    return s;
+  };
+})(GeographicLib.DMS);
+
+cb(GeographicLib);
+
+})(function(geo) {
+  if (typeof module === 'object' && module.exports) {
+    /******** support loading with node's require ********/
+    module.exports = geo;
+  } else if (true) {
+    /******** support loading with AMD ********/
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function() { return geo; }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else {
+    /******** otherwise just pollute our global namespace ********/
+    window.GeographicLib = geo;
+  }
+});
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ })
+/******/ ]);
