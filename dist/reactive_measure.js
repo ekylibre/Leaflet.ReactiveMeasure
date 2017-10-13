@@ -75,7 +75,6 @@ module.exports = L;
 
 __webpack_require__(2);
 __webpack_require__(3);
-(function webpackMissingModule() { throw new Error("Cannot find module \"./src/leaflet.draw-0.3.patches.coffee\""); }());
 module.exports = __webpack_require__(5);
 
 
@@ -199,6 +198,21 @@ L.Polygon.include({
       center = [x / area, y / area];
     }
     return this._map.layerPointToLatLng(center);
+  },
+
+  /*
+   * Return LatLngs as array of [lat, lng] pair.
+   * @return {Array} [[lat,lng], [lat,lng]]
+   */
+  getLatLngsAsArray: function() {
+    var arr, k, latlng, len1, ref;
+    arr = [];
+    ref = this._latlngs[0];
+    for (k = 0, len1 = ref.length; k < len1; k++) {
+      latlng = ref[k];
+      arr.push([latlng.lat, latlng.lng]);
+    }
+    return arr;
   }
 });
 
@@ -306,13 +320,15 @@ L.Draw.Polyline.include({
   __addHooks: L.Draw.Polyline.prototype.addHooks,
   __removeHooks: L.Draw.Polyline.prototype.removeHooks,
   __vertexChanged: L.Draw.Polyline.prototype._vertexChanged,
-  _vertexChanged: function() {
+  _vertexChanged: function(e) {
     this.__vertexChanged.apply(this, arguments);
-    return this._tooltip.hide();
+    if ((e.target.reactiveMeasureControl.options.tooltip == null) && (this._tooltip != null)) {
+      return this._tooltip.hide();
+    }
   },
   __onMouseMove: function(e) {
     var center, clone, g, k, latLng, latLngArray, len1, measure, mouseLatLng, newPos, ref;
-    if (this._tooltip != null) {
+    if ((e.target.reactiveMeasureControl.options.tooltip == null) && (this._tooltip != null)) {
       this._tooltip.hide();
     }
     if (!(this._markers.length > 0)) {
@@ -331,7 +347,6 @@ L.Draw.Polyline.include({
       clone = L.polyline(latLngArray);
     }
     if (this._markers.length >= 2) {
-      console.log(this._markers);
       clone = L.polygon(latLngArray);
     }
     clone._map = this._map;
@@ -341,9 +356,12 @@ L.Draw.Polyline.include({
       perimeter: g.perimeter(),
       area: g.area()
     };
-    return e.target.reactiveMeasureControl.updateContent(measure, {
+    e.target.reactiveMeasureControl.updateContent(measure, {
       selection: true
     });
+    if (e.target.reactiveMeasureControl.options.tooltip != null) {
+      return this._tooltip.__updateTooltipMeasure(center, measure, e.target.reactiveMeasureControl.options);
+    }
   },
   addHooks: function() {
     this.__addHooks.apply(this, arguments);

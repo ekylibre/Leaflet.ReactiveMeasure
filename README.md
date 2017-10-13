@@ -2,7 +2,7 @@
 
 This plugin extends Leaflet.Draw to provide a Measure Control on both visualization and edition mode.
 
-Works with Leaflet 0.7.x and Leaflet.Draw 0.3.x
+Works with Leaflet 1.2.0 and Leaflet.Draw 0.4.12
 
 ## Usage
 

@@ -15,7 +15,6 @@ module.exports =
       # Be sure to reset
       @options.measure.perimeter = 0
       @options.measure.area = 0
-
       if layers.getLayers().length > 0
         layers.eachLayer (layer) =>
           if typeof layer.getMeasure is 'function'
@@ -96,6 +95,16 @@ L.Polygon.include
         y / area
       ]
     @_map.layerPointToLatLng center
+
+  ###
+  # Return LatLngs as array of [lat, lng] pair.
+  # @return {Array} [[lat,lng], [lat,lng]]
+   ###
+  getLatLngsAsArray: ->
+    arr = []
+    for latlng in @_latlngs[0]
+      arr.push [latlng.lat, latlng.lng]
+    arr
 
 L.Polyline.include
   ###
@@ -193,13 +202,13 @@ L.Draw.Polyline.include
   __removeHooks: L.Draw.Polyline.prototype.removeHooks
   __vertexChanged: L.Draw.Polyline.prototype._vertexChanged
 
-  _vertexChanged: () ->
+  _vertexChanged: (e) ->
     @__vertexChanged.apply this, arguments
-    @_tooltip.hide()
-
+    @_tooltip.hide() if !e.target.reactiveMeasureControl.options.tooltip? && @_tooltip?
 
   __onMouseMove: (e) ->
-    @_tooltip.hide() if @_tooltip?
+    @_tooltip.hide() if !e.target.reactiveMeasureControl.options.tooltip? && @_tooltip?
+
     return unless @_markers.length > 0
     newPos = @_map.mouseEventToLayerPoint(e.originalEvent)
     mouseLatLng = @_map.layerPointToLatLng(newPos)
@@ -227,6 +236,9 @@ L.Draw.Polyline.include
       area: g.area()
 
     e.target.reactiveMeasureControl.updateContent measure, {selection: true}
+
+    if e.target.reactiveMeasureControl.options.tooltip?
+      @_tooltip.__updateTooltipMeasure(center, measure, e.target.reactiveMeasureControl.options)
 
 
 
@@ -271,7 +283,7 @@ L.Edit.Poly.include
       perimeter: g.perimeter()
       area: g.area()
 
-    @._poly._map.reactiveMeasureControl.updateContent measure, {selection: false} if @._poly._map?
+    @._poly._map.reactiveMeasureControl.updateContent measure, {selection: false} if @_poly._map?
 
     if L.EditToolbar.reactiveMeasure
       this._poly.off 'editdrag'
@@ -306,9 +318,9 @@ L.Edit.PolyVerticesEdit.include
 L.LatLng.prototype.toArray = ->
   [@lat, @lng]
 
-L.Tooltip.include
-  __initialize: L.Tooltip.prototype.initialize
-  __dispose: L.Tooltip.prototype.dispose
+L.Draw.Tooltip.include
+  __initialize: L.Draw.Tooltip.prototype.initialize
+  __dispose: L.Draw.Tooltip.prototype.dispose
 
   initialize: (map,options = {}) ->
     @__initialize.apply this, arguments
