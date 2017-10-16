@@ -204,10 +204,10 @@ L.Draw.Polyline.include
 
   _vertexChanged: (e) ->
     @__vertexChanged.apply this, arguments
-    @_tooltip.hide() if !e.target.reactiveMeasureControl.options.tooltip? && @_tooltip?
+    @_tooltip.hide() if !@._map.reactiveMeasureControl.options.reactiveMeasure.tooltip? && @_tooltip?
 
   __onMouseMove: (e) ->
-    @_tooltip.hide() if !e.target.reactiveMeasureControl.options.tooltip? && @_tooltip?
+    @_tooltip.hide() if !e.target.reactiveMeasureControl.options.reactiveMeasure.tooltip? && @_tooltip?
 
     return unless @_markers.length > 0
     newPos = @_map.mouseEventToLayerPoint(e.originalEvent)
@@ -237,7 +237,7 @@ L.Draw.Polyline.include
 
     e.target.reactiveMeasureControl.updateContent measure, {selection: true}
 
-    if e.target.reactiveMeasureControl.options.tooltip?
+    if e.target.reactiveMeasureControl.options.reactiveMeasure.tooltip?
       @_tooltip.__updateTooltipMeasure(center, measure, e.target.reactiveMeasureControl.options)
 
 
