@@ -322,13 +322,13 @@ L.Draw.Polyline.include({
   __vertexChanged: L.Draw.Polyline.prototype._vertexChanged,
   _vertexChanged: function(e) {
     this.__vertexChanged.apply(this, arguments);
-    if ((this._map.reactiveMeasureControl.options.reactiveMeasure.tooltip == null) && (this._tooltip != null)) {
+    if ((this._map.reactiveMeasureControl.options.tooltip == null) && (this._tooltip != null)) {
       return this._tooltip.hide();
     }
   },
   __onMouseMove: function(e) {
     var center, clone, g, k, latLng, latLngArray, len1, measure, mouseLatLng, newPos, ref;
-    if ((e.target.reactiveMeasureControl.options.reactiveMeasure.tooltip == null) && (this._tooltip != null)) {
+    if ((e.target.reactiveMeasureControl.options.tooltip == null) && (this._tooltip != null)) {
       this._tooltip.hide();
     }
     if (!(this._markers.length > 0)) {
@@ -359,7 +359,7 @@ L.Draw.Polyline.include({
     e.target.reactiveMeasureControl.updateContent(measure, {
       selection: true
     });
-    if (e.target.reactiveMeasureControl.options.reactiveMeasure.tooltip != null) {
+    if (e.target.reactiveMeasureControl.options.tooltip != null) {
       return this._tooltip.__updateTooltipMeasure(center, measure, e.target.reactiveMeasureControl.options);
     }
   },
