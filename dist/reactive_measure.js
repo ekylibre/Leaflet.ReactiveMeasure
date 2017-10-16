@@ -368,7 +368,18 @@ L.Draw.Polyline.include({
     this._map.on('mousemove', this.__onMouseMove, this);
   },
   removeHooks: function() {
+    var g, measure;
     if (this._map.reactiveMeasureControl) {
+      g = new L.GeographicUtil.Polygon(this._poly.getLatLngsAsArray());
+      measure = {
+        perimeter: g.perimeter(),
+        area: g.area()
+      };
+      if (this._poly._map != null) {
+        this._poly._map.reactiveMeasureControl.updateContent(measure, {
+          selection: false
+        });
+      }
       this._map.off('mousemove');
     }
     this.__removeHooks.apply(this, arguments);

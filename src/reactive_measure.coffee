@@ -249,6 +249,15 @@ L.Draw.Polyline.include
 
   removeHooks: () ->
     if @_map.reactiveMeasureControl
+
+      g = new L.GeographicUtil.Polygon @_poly.getLatLngsAsArray()
+
+      measure =
+        perimeter: g.perimeter()
+        area: g.area()
+
+      @._poly._map.reactiveMeasureControl.updateContent measure, {selection: false} if @_poly._map?
+
       @_map.off 'mousemove'
     @__removeHooks.apply this, arguments
     return
@@ -269,7 +278,6 @@ L.Edit.Poly.include
     L.extend(L.Draw.Polyline.prototype.options, target: e.marker.getLatLng())
 
     @_poly._map.reactiveMeasureControl.updateContent(measure, {selection: true}) if @_poly._map?
-
 
   addHooks: () ->
     @__addHooks.apply this, arguments
