@@ -376,29 +376,3 @@ L.Draw.Tooltip.include
 
   hide: ->
     @_container.style.visibility = 'hidden'
-
-L.EditToolbar.Edit.include
-  _onMouseMove: (e) ->
-    return
-
-L.EditToolbar.Delete.include
-  _onMouseMove: (e) ->
-    return
-
-###
-#Add Configuration options
-###
-
-L.DrawToolbar.include
-  __initialize: L.DrawToolbar.prototype.initialize
-
-  initialize: (options) ->
-    @__initialize.apply this, arguments
-    return
-
-L.EditToolbar.include
-  __initialize: L.EditToolbar.prototype.initialize
-
-  initialize: () ->
-    @__initialize.apply this, arguments
-    return
