@@ -1,5 +1,10 @@
 L = require('leaflet')
 
+L.ReactiveMeasure = {}
+L.ReactiveMeasure.Draw = {}
+L.ReactiveMeasure.Draw.Event = {}
+L.ReactiveMeasure.Draw.Event.MOVE = "reactiveMeasure:draw:move"
+
 module.exports =
   L.ReactiveMeasureControl = L.Control.extend
     options:
@@ -240,7 +245,7 @@ L.Draw.Polyline.include
     if e.target.reactiveMeasureControl.options.tooltip?
       @_tooltip.__updateTooltipMeasure(center, measure, e.target.reactiveMeasureControl.options)
 
-
+    @_map.fire L.ReactiveMeasure.Draw.Event.MOVE, {measure: measure}
 
   addHooks: () ->
     @__addHooks.apply this, arguments
