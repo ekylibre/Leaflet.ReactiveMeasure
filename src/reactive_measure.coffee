@@ -2,8 +2,11 @@ L = require('leaflet')
 
 L.ReactiveMeasure = {}
 L.ReactiveMeasure.Draw = {}
+L.ReactiveMeasure.Edit = {}
 L.ReactiveMeasure.Draw.Event = {}
+L.ReactiveMeasure.Edit.Event = {}
 L.ReactiveMeasure.Draw.Event.MOVE = "reactiveMeasure:draw:move"
+L.ReactiveMeasure.Edit.Event.MOVE = "reactiveMeasure:edit:move"
 
 module.exports =
   L.ReactiveMeasureControl = L.Control.extend
@@ -283,6 +286,9 @@ L.Edit.Poly.include
     L.extend(L.Draw.Polyline.prototype.options, target: e.marker.getLatLng())
 
     @_poly._map.reactiveMeasureControl.updateContent(measure, {selection: true}) if @_poly._map?
+
+    @_poly._map.fire L.ReactiveMeasure.Edit.Event.MOVE, {measure: measure}
+
 
   addHooks: () ->
     @__addHooks.apply this, arguments

@@ -90,9 +90,15 @@ L.ReactiveMeasure = {};
 
 L.ReactiveMeasure.Draw = {};
 
+L.ReactiveMeasure.Edit = {};
+
 L.ReactiveMeasure.Draw.Event = {};
 
+L.ReactiveMeasure.Edit.Event = {};
+
 L.ReactiveMeasure.Draw.Event.MOVE = "reactiveMeasure:draw:move";
+
+L.ReactiveMeasure.Edit.Event.MOVE = "reactiveMeasure:edit:move";
 
 module.exports = L.ReactiveMeasureControl = L.Control.extend({
   options: {
@@ -412,10 +418,13 @@ L.Edit.Poly.include({
       target: e.marker.getLatLng()
     });
     if (this._poly._map != null) {
-      return this._poly._map.reactiveMeasureControl.updateContent(measure, {
+      this._poly._map.reactiveMeasureControl.updateContent(measure, {
         selection: true
       });
     }
+    return this._poly._map.fire(L.ReactiveMeasure.Edit.Event.MOVE, {
+      measure: measure
+    });
   },
   addHooks: function() {
     this.__addHooks.apply(this, arguments);
