@@ -336,14 +336,14 @@ L.Draw.Polyline.include({
   __vertexChanged: L.Draw.Polyline.prototype._vertexChanged,
   _vertexChanged: function(e) {
     this.__vertexChanged.apply(this, arguments);
-    if ((this._map.reactiveMeasureControl.options.tooltip == null) && (this._tooltip != null)) {
-      return this._tooltip.hide();
+    if (!this._map.reactiveMeasureControl.options.tooltip && (this._tooltip != null)) {
+      return L.DomUtil.setOpacity(this._tooltip._container, 0);
     }
   },
   __onMouseMove: function(e) {
     var center, clone, g, k, latLng, latLngArray, len1, measure, mouseLatLng, newPos, ref;
-    if ((e.target.reactiveMeasureControl.options.tooltip == null) && (this._tooltip != null)) {
-      this._tooltip.hide();
+    if (!e.target.reactiveMeasureControl.options.tooltip && (this._tooltip != null)) {
+      L.DomUtil.setOpacity(this._tooltip._container, 0);
     }
     if (!(this._markers.length > 0)) {
       return;
@@ -525,7 +525,7 @@ L.Draw.Tooltip.include({
     }
     pos = this._map.latLngToLayerPoint(latlng);
     labelWidth = this._container.offsetWidth;
-    map_width = this._map.getContainer().offsetWidth;
+    map_width = this._map._container.offsetWidth;
     L.DomUtil.removeClass(this._container, 'leaflet-draw-tooltip-left');
     if (this._container) {
       this._container.style.visibility = 'inherit';

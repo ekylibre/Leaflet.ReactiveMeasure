@@ -212,10 +212,13 @@ L.Draw.Polyline.include
 
   _vertexChanged: (e) ->
     @__vertexChanged.apply this, arguments
-    @_tooltip.hide() if !@._map.reactiveMeasureControl.options.tooltip? && @_tooltip?
+
+    if !@_map.reactiveMeasureControl.options.tooltip && @_tooltip?
+      L.DomUtil.setOpacity(@_tooltip._container, 0)
 
   __onMouseMove: (e) ->
-    @_tooltip.hide() if !e.target.reactiveMeasureControl.options.tooltip? && @_tooltip?
+    if !e.target.reactiveMeasureControl.options.tooltip && @_tooltip?
+      L.DomUtil.setOpacity(@_tooltip._container, 0)
 
     return unless @_markers.length > 0
     newPos = @_map.mouseEventToLayerPoint(e.originalEvent)
@@ -368,7 +371,7 @@ L.Draw.Tooltip.include
     pos = @_map.latLngToLayerPoint(latlng)
     labelWidth = @_container.offsetWidth
 
-    map_width =  @_map.getContainer().offsetWidth
+    map_width =  @_map._container.offsetWidth
     L.DomUtil.removeClass(@_container, 'leaflet-draw-tooltip-left')
 
     if @_container
