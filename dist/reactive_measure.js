@@ -337,13 +337,15 @@ L.Draw.Polyline.include({
   _vertexChanged: function(e) {
     this.__vertexChanged.apply(this, arguments);
     if (!this._map.reactiveMeasureControl.options.tooltip && (this._tooltip != null)) {
-      return L.DomUtil.setOpacity(this._tooltip._container, 0);
+      L.DomUtil.setOpacity(this._tooltip._container, 0);
+      return L.DomUtil.setPosition(this._tooltip._container, L.point(0, 0));
     }
   },
   __onMouseMove: function(e) {
     var center, clone, g, k, latLng, latLngArray, len1, measure, mouseLatLng, newPos, ref;
     if (!e.target.reactiveMeasureControl.options.tooltip && (this._tooltip != null)) {
       L.DomUtil.setOpacity(this._tooltip._container, 0);
+      L.DomUtil.setPosition(this._tooltip._container, L.point(0, 0));
     }
     if (!(this._markers.length > 0)) {
       return;

@@ -215,10 +215,12 @@ L.Draw.Polyline.include
 
     if !@_map.reactiveMeasureControl.options.tooltip && @_tooltip?
       L.DomUtil.setOpacity(@_tooltip._container, 0)
-
+      L.DomUtil.setPosition(@_tooltip._container, L.point(0,0))
+      
   __onMouseMove: (e) ->
     if !e.target.reactiveMeasureControl.options.tooltip && @_tooltip?
       L.DomUtil.setOpacity(@_tooltip._container, 0)
+      L.DomUtil.setPosition(@_tooltip._container, L.point(0,0))
 
     return unless @_markers.length > 0
     newPos = @_map.mouseEventToLayerPoint(e.originalEvent)
