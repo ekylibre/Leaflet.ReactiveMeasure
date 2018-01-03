@@ -216,7 +216,7 @@ L.Draw.Polyline.include
     if !@_map.reactiveMeasureControl.options.tooltip && @_tooltip?
       L.DomUtil.setOpacity(@_tooltip._container, 0)
       L.DomUtil.setPosition(@_tooltip._container, L.point(0,0))
-      
+
   __onMouseMove: (e) ->
     if !e.target.reactiveMeasureControl.options.tooltip && @_tooltip?
       L.DomUtil.setOpacity(@_tooltip._container, 0)
@@ -279,10 +279,11 @@ L.Edit.Poly.include
   __addHooks: L.Edit.Poly.prototype.addHooks
   __removeHooks: L.Edit.Poly.prototype.removeHooks
 
-  __onHandlerDrag: (e) ->
-    center = @_poly.__getCenter()
+  __onHandlerDrag: (e) =>
+    _poly = e.target.editing._poly
+    center = _poly.__getCenter()
 
-    g = new L.GeographicUtil.Polygon @_poly.getLatLngsAsArray()
+    g = new L.GeographicUtil.Polygon _poly.getLatLngsAsArray()
 
     measure =
       perimeter: g.perimeter()
@@ -290,9 +291,9 @@ L.Edit.Poly.include
 
     L.extend(L.Draw.Polyline.prototype.options, target: e.marker.getLatLng())
 
-    @_poly._map.reactiveMeasureControl.updateContent(measure, {selection: true}) if @_poly._map?
+    _poly._map.reactiveMeasureControl.updateContent(measure, {selection: true}) if _poly._map?
 
-    @_poly._map.fire L.ReactiveMeasure.Edit.Event.MOVE, {measure: measure}
+    _poly._map.fire L.ReactiveMeasure.Edit.Event.MOVE, {measure: measure}
 
 
   addHooks: () ->

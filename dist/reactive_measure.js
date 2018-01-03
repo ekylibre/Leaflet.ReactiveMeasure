@@ -408,26 +408,29 @@ L.Draw.Polyline.include({
 L.Edit.Poly.include({
   __addHooks: L.Edit.Poly.prototype.addHooks,
   __removeHooks: L.Edit.Poly.prototype.removeHooks,
-  __onHandlerDrag: function(e) {
-    var center, g, measure;
-    center = this._poly.__getCenter();
-    g = new L.GeographicUtil.Polygon(this._poly.getLatLngsAsArray());
-    measure = {
-      perimeter: g.perimeter(),
-      area: g.area()
-    };
-    L.extend(L.Draw.Polyline.prototype.options, {
-      target: e.marker.getLatLng()
-    });
-    if (this._poly._map != null) {
-      this._poly._map.reactiveMeasureControl.updateContent(measure, {
-        selection: true
+  __onHandlerDrag: (function(_this) {
+    return function(e) {
+      var _poly, center, g, measure;
+      _poly = e.target.editing._poly;
+      center = _poly.__getCenter();
+      g = new L.GeographicUtil.Polygon(_poly.getLatLngsAsArray());
+      measure = {
+        perimeter: g.perimeter(),
+        area: g.area()
+      };
+      L.extend(L.Draw.Polyline.prototype.options, {
+        target: e.marker.getLatLng()
       });
-    }
-    return this._poly._map.fire(L.ReactiveMeasure.Edit.Event.MOVE, {
-      measure: measure
-    });
-  },
+      if (_poly._map != null) {
+        _poly._map.reactiveMeasureControl.updateContent(measure, {
+          selection: true
+        });
+      }
+      return _poly._map.fire(L.ReactiveMeasure.Edit.Event.MOVE, {
+        measure: measure
+      });
+    };
+  })(this),
   addHooks: function() {
     this.__addHooks.apply(this, arguments);
     return this._poly.on('editdrag', this.__onHandlerDrag, this);
