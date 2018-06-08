@@ -357,6 +357,7 @@ L.Draw.Polyline.include({
     for (k = 0, len1 = ref.length; k < len1; k++) {
       latLng = ref[k];
       latLngArray.push(latLng);
+      L.marker(latLng).addTo(this._map);
     }
     latLngArray.push(mouseLatLng);
     if (this._markers.length === 1) {
@@ -568,9 +569,13 @@ L.GeographicUtil = L.extend(L.GeographicUtil || {}, {
     return r.s12.toFixed(3);
   },
   Polygon: function(points) {
-    var i, len, point;
+    var i, len, point, polyline;
     this.geod = GeographicLib.Geodesic.WGS84;
-    this.poly = this.geod.Polygon(false);
+    polyline = false;
+    if (points.length === 2) {
+      polyline = true;
+    }
+    this.poly = this.geod.Polygon(polyline);
     for (i = 0, len = points.length; i < len; i++) {
       point = points[i];
       this.poly.AddPoint(point[0], point[1]);
