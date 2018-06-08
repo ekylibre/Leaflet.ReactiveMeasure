@@ -229,10 +229,8 @@ L.Draw.Polyline.include
     latLngArray = []
     for latLng in @_poly.getLatLngs()
       latLngArray.push latLng
-      L.marker(latLng).addTo @_map
     latLngArray.push mouseLatLng
 
-    #console.log @_poly.getLatLngs(), mouseLatLng
     # draw a polyline
     if @_markers.length == 1
       clone = L.polyline latLngArray
