@@ -357,7 +357,6 @@ L.Draw.Polyline.include({
     for (k = 0, len1 = ref.length; k < len1; k++) {
       latLng = ref[k];
       latLngArray.push(latLng);
-      L.marker(latLng).addTo(this._map);
     }
     latLngArray.push(mouseLatLng);
     if (this._markers.length === 1) {
