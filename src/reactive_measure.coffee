@@ -1,4 +1,5 @@
 L = require('leaflet')
+require('leaflet-geographicutil')
 
 L.ReactiveMeasure = {}
 L.ReactiveMeasure.Draw = {}
@@ -196,14 +197,7 @@ L.Polyline.include
     return
 
   getMeasure: () ->
-    g = new L.GeographicUtil.Polygon @getLatLngsAsArray()
-
-    measure =
-      perimeter: g.perimeter()
-      area: g.area()
-
-    measure
-
+    L.GeographicUtil.Polygon @getLatLngsAsArray()
 
 L.Draw.Polyline.include
   __addHooks: L.Draw.Polyline.prototype.addHooks
@@ -242,11 +236,7 @@ L.Draw.Polyline.include
     clone._map = @_map
     center = clone.__getCenter()
 
-    g = new L.GeographicUtil.Polygon clone.getLatLngsAsArray()
-
-    measure =
-      perimeter: g.perimeter()
-      area: g.area()
+    measure = L.GeographicUtil.Polygon clone.getLatLngsAsArray()
 
     e.target.reactiveMeasureControl.updateContent measure, {selection: true}
 
@@ -263,11 +253,7 @@ L.Draw.Polyline.include
   removeHooks: () ->
     if @_map.reactiveMeasureControl
 
-      g = new L.GeographicUtil.Polygon @_poly.getLatLngsAsArray()
-
-      measure =
-        perimeter: g.perimeter()
-        area: g.area()
+      measure = L.GeographicUtil.Polygon @_poly.getLatLngsAsArray()
 
       @._poly._map.reactiveMeasureControl.updateContent measure, {selection: false} if @_poly._map?
 
@@ -283,11 +269,7 @@ L.Edit.Poly.include
     _poly = e.target.editing._poly
     center = _poly.__getCenter()
 
-    g = new L.GeographicUtil.Polygon _poly.getLatLngsAsArray()
-
-    measure =
-      perimeter: g.perimeter()
-      area: g.area()
+    measure = L.GeographicUtil.Polygon _poly.getLatLngsAsArray()
 
     L.extend(L.Draw.Polyline.prototype.options, target: e.marker.getLatLng())
 
@@ -302,11 +284,7 @@ L.Edit.Poly.include
 
   removeHooks: () ->
 
-    g = new L.GeographicUtil.Polygon @_poly.getLatLngsAsArray()
-
-    measure =
-      perimeter: g.perimeter()
-      area: g.area()
+    measure = L.GeographicUtil.Polygon @_poly.getLatLngsAsArray()
 
     @._poly._map.reactiveMeasureControl.updateContent measure, {selection: false} if @_poly._map?
 

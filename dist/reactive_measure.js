@@ -60,31 +60,26 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = L;
+__webpack_require__(1);
+module.exports = __webpack_require__(4);
+
 
 /***/ }),
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(2);
-__webpack_require__(3);
-module.exports = __webpack_require__(5);
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
 var L;
 
-L = __webpack_require__(0);
+L = __webpack_require__(2);
+
+__webpack_require__(3);
 
 L.ReactiveMeasure = {};
 
@@ -320,13 +315,7 @@ L.Polyline.include({
     }
   },
   getMeasure: function() {
-    var g, measure;
-    g = new L.GeographicUtil.Polygon(this.getLatLngsAsArray());
-    measure = {
-      perimeter: g.perimeter(),
-      area: g.area()
-    };
-    return measure;
+    return L.GeographicUtil.Polygon(this.getLatLngsAsArray());
   }
 });
 
@@ -342,7 +331,7 @@ L.Draw.Polyline.include({
     }
   },
   __onMouseMove: function(e) {
-    var center, clone, g, k, latLng, latLngArray, len1, measure, mouseLatLng, newPos, ref;
+    var center, clone, k, latLng, latLngArray, len1, measure, mouseLatLng, newPos, ref;
     if (!e.target.reactiveMeasureControl.options.tooltip && (this._tooltip != null)) {
       L.DomUtil.setOpacity(this._tooltip._container, 0);
       L.DomUtil.setPosition(this._tooltip._container, L.point(0, 0));
@@ -367,11 +356,7 @@ L.Draw.Polyline.include({
     }
     clone._map = this._map;
     center = clone.__getCenter();
-    g = new L.GeographicUtil.Polygon(clone.getLatLngsAsArray());
-    measure = {
-      perimeter: g.perimeter(),
-      area: g.area()
-    };
+    measure = L.GeographicUtil.Polygon(clone.getLatLngsAsArray());
     e.target.reactiveMeasureControl.updateContent(measure, {
       selection: true
     });
@@ -387,13 +372,9 @@ L.Draw.Polyline.include({
     this._map.on('mousemove', this.__onMouseMove, this);
   },
   removeHooks: function() {
-    var g, measure;
+    var measure;
     if (this._map.reactiveMeasureControl) {
-      g = new L.GeographicUtil.Polygon(this._poly.getLatLngsAsArray());
-      measure = {
-        perimeter: g.perimeter(),
-        area: g.area()
-      };
+      measure = L.GeographicUtil.Polygon(this._poly.getLatLngsAsArray());
       if (this._poly._map != null) {
         this._poly._map.reactiveMeasureControl.updateContent(measure, {
           selection: false
@@ -410,14 +391,10 @@ L.Edit.Poly.include({
   __removeHooks: L.Edit.Poly.prototype.removeHooks,
   __onHandlerDrag: (function(_this) {
     return function(e) {
-      var _poly, center, g, measure;
+      var _poly, center, measure;
       _poly = e.target.editing._poly;
       center = _poly.__getCenter();
-      g = new L.GeographicUtil.Polygon(_poly.getLatLngsAsArray());
-      measure = {
-        perimeter: g.perimeter(),
-        area: g.area()
-      };
+      measure = L.GeographicUtil.Polygon(_poly.getLatLngsAsArray());
       L.extend(L.Draw.Polyline.prototype.options, {
         target: e.marker.getLatLng()
       });
@@ -436,12 +413,8 @@ L.Edit.Poly.include({
     return this._poly.on('editdrag', this.__onHandlerDrag, this);
   },
   removeHooks: function() {
-    var g, measure;
-    g = new L.GeographicUtil.Polygon(this._poly.getLatLngsAsArray());
-    measure = {
-      perimeter: g.perimeter(),
-      area: g.area()
-    };
+    var measure;
+    measure = L.GeographicUtil.Polygon(this._poly.getLatLngsAsArray());
     if (this._poly._map != null) {
       this._poly._map.reactiveMeasureControl.updateContent(measure, {
         selection: false
@@ -551,50 +524,145 @@ L.Draw.Tooltip.include({
 
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = L;
+
+/***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, {
+/******/ 				configurable: false,
+/******/ 				enumerable: true,
+/******/ 				get: getter
+/******/ 			});
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(1);
+
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var GeographicLib, L;
 
-L = __webpack_require__(0);
+L = __webpack_require__(2);
 
-GeographicLib = __webpack_require__(4);
+GeographicLib = __webpack_require__(3);
 
-L.GeographicUtil = L.extend(L.GeographicUtil || {}, {
-  geod: GeographicLib.Geodesic.WGS84,
-  distance: function(a, b) {
-    var r;
-    r = this.geod.Inverse(a[0], a[1], b[0], b[1]);
-    return r.s12.toFixed(3);
-  },
-  Polygon: function(points) {
-    var i, len, point, polyline;
-    this.geod = GeographicLib.Geodesic.WGS84;
-    polyline = false;
-    if (points.length === 2) {
-      polyline = true;
+L.GeographicUtil = (function() {
+  function GeographicUtil() {}
+
+  GeographicUtil.Polygon = function(points, polyline) {
+    var geod, i, j, len, len1, point, poly, poly2;
+    if (polyline == null) {
+      polyline = false;
     }
-    this.poly = this.geod.Polygon(polyline);
+    geod = GeographicLib.Geodesic.WGS84;
+    poly = geod.Polygon(false);
     for (i = 0, len = points.length; i < len; i++) {
       point = points[i];
-      this.poly.AddPoint(point[0], point[1]);
+      poly.AddPoint(point[0], point[1]);
     }
-    this.poly = this.poly.Compute(false, true);
-  }
-});
+    poly = poly.Compute(false, true);
+    poly2 = geod.Polygon(true);
+    for (j = 0, len1 = points.length; j < len1; j++) {
+      point = points[j];
+      poly2.AddPoint(point[0], point[1]);
+    }
+    poly2 = poly2.Compute(false, true);
+    return {
+      extrapolatedPerimeter: poly.perimeter,
+      extrapolatedArea: Math.abs(poly.area),
+      perimeter: poly2.perimeter
+    };
+  };
 
-L.GeographicUtil.Polygon.prototype = {
-  perimeter: function() {
-    return this.poly.perimeter;
-  },
-  area: function() {
-    return Math.abs(this.poly.area);
-  }
-};
+  GeographicUtil.distance = function(a, b) {
+    var geod, r;
+    geod = GeographicLib.Geodesic.WGS84;
+    r = geod.Inverse(a[0], a[1], b[0], b[1]);
+    return r.s12.toFixed(3);
+  };
+
+  return GeographicUtil;
+
+})();
 
 
 /***/ }),
-/* 4 */
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = L;
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -3683,8 +3751,11 @@ cb(GeographicLib);
 });
 
 
+/***/ })
+/******/ ]);
+
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

@@ -16,7 +16,7 @@ module.exports = {
       }
     ]
   },
-  entry: ['./src/reactive_measure.coffee', './src/geographic_util.coffee', './src/reactive_measure.scss'],
+  entry: ['./src/reactive_measure.coffee', './src/reactive_measure.scss'],
   output: {
     path: __dirname + '/dist',
     filename: 'reactive_measure.js'

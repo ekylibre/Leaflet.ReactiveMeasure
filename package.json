@@ -28,6 +28,7 @@
   "dependencies": {
     "geographiclib": "^1.49.0",
     "leaflet": "^1.2.0",
-    "leaflet-draw": "^0.4.12"
+    "leaflet-draw": "^0.4.12",
+    "leaflet-geographicutil": "git+https://github.com/ekylibre/Leaflet.GeographicUtil.git"
   }
 }
